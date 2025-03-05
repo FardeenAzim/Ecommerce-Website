@@ -1,6 +1,257 @@
 {% comment %} {% extends 'base.html' %} {% endcomment %}
 {% comment %} {% block title %} Contact {% endblock title %} {% endcomment %}
+{% load static %} 
+{% comment %} Help include images, css, js  {% endcomment %}
+<!DOCTYPE html>
+{% comment %} Indicates the document is an html document and its vewrsions {% endcomment %}
+<html lang="en">
+  {% comment %}  Starting of html and defines its language is english {% endcomment %}
+  <head>
+    {% comment %} It carriies meta data about the site {% endcomment %}
+    <meta charset="utf-8" />
+    {% comment %} Used to display the special characters correctly {% endcomment %}
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    {% comment %} Makes the site responsive {% endcomment %}
+    <title>{% block title %} {% endblock title %}</title>
+    {% comment %}  Used to define a placeholder for dynamic page titles. Child templates can override this bloack to set customer titles  {% endcomment %}
+    <meta
+      name="description"
+      content="ecommerce website for the goods you require accroding to you at very good quality"
+    />
+    {% comment %} This tag provide a brief description of site to search engines  {% endcomment %}
+    <meta
+      name="keywords"
+      content="selling, amazon, goodproducts, bestquality"
+    />
+    {% comment %} This tag specifies important keywords which can improve the site's search engine ranking {% endcomment %}
+
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    {% comment %} This indicates the google fonts to use in the site correctly  {% endcomment %}
+
+      <!-- Bootstrap CSS -->
+      {% block extra_css %}
+      <link rel="stylesheet"href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"crossorigin="anonymous"/>
+      {% endblock %}
+    {% comment %} Django template tags used to allow css to be added inside this block if needed   {% endcomment %}
+      
+    <!-- Vendor CSS Files -->
+    <link
+      href="{% static '/assets/vendor/bootstrap/css/bootstrap.min.css'%}"
+      rel="stylesheet"
+    />
+    {% comment %} It links to the bootstrap css file from the project's static folder, used for layout and ui components {% endcomment %}
+    <link
+      href="{% static '/assets/vendor/bootstrap-icons/bootstrap-icons.css'%}"
+      rel="stylesheet"
+    />
+    {% comment %} It likns to the Bootstrap Icons css file for icon styles {% endcomment %}
+    <link href="{% static '/assets/vendor/aos/aos.css'%}" rel="stylesheet" />
+    {% comment %} It links the AOS (Animation On Scroll) Css file, used for scroll animations {% endcomment %}
+    <link
+      href="{% static '/assets/vendor/glightbox/css/glightbox.min.css'%}"
+      rel="stylesheet"
+    />
+    {% comment %} This links to the Glightbox CSS file which is used for a lightbox gallery feature {% endcomment %}
+    <link
+      href="{% static '/assets/vendor/swiper/swiper-bundle.min.css'%}"
+      rel="stylesheet"
+    />
+    {% comment %} It links to the Swiper css file, which provides a touch slider/carousel component {% endcomment %}
+    <!-- Main CSS File -->
+    <link href="{% static '/assets/css/main.css'%}" rel="stylesheet" />
+    {% comment %} It links to the custom main.css file that contains the site's main styling rules {% endcomment %}
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% comment %} It includes an older version of the framework, used for building responsive layouts {% endcomment %}
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    {% comment %} It is used for DOM manipulation and Bootsrap's javascript components {% endcomment %}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    {% comment %} It includes a library required for tooltips, popovers, and dropdowns in bootstrap {% endcomment %}
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    {% comment %} It includes the bootstrap js file, which enables dynamics features like modals, carousels, and navigations in bootstrap components {% endcomment %}
+
+  </head>
+  {% comment %} end part of the head tag {% endcomment %}
+
+  <body class="index-page">
+    <header id="header" class="header d-flex align-items-center fixed-top">
+      {% comment %} Header section of the site and positions it at the top 
+      d-flex: It applies flexbox layout to the element allowing flexible and responsive arrangement of its child elements
+      align-items-center: Flexbox utility class that vertically centers the items(children) within the header
+      fixed-top: it fixes the header to the top of the viewport, so it remains visible while scrolling {% endcomment %}
+      <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+        {% comment %} it makes the container full width and makes the container extra-large on larger screens and positions
+         the element relative to its normal position and enables flexible layout and verically centers the child elements and 
+         spaces child element with even distribution between left and right{% endcomment %}
+        <a href="/" class="logo d-flex align-items-center">
+           {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
+          <h1 class="logo" href="/" style="color: blue;">Shopille</h1>
+        </a>
+        {% comment %} Logo {% endcomment %}
+
+        <nav id="navmenu" class="navmenu">
+          <ul>
+
+            <a href="/">
+              <button id="home" class="btn btn-light position-relative nav-link scrollto bg-secondary p-2 m-2 text-white" type="button" data-bs-toggle="popover"
+                title="Home" style="border-radius: 15px;">
+                Home
+              </button>
+            </a>
+            {% comment %} Home {% endcomment %}
+
+            <a href="/about">
+              <button id="about" class="btn btn-light position-relative nav-link scrollto bg-secondary p-2 m-2 text-white" type="button" data-bs-toggle="popover"
+                title="About" style="border-radius: 15px;">
+                About
+              </button>
+            </a>
+            {% comment %} About {% endcomment %}
+
+            <a href="/profile">
+              <button id="profile" class="btn btn-light position-relative nav-link scrollto bg-secondary p-2 m-2 text-white" type="button" data-bs-toggle="popover"
+                title="profile" style="border-radius: 15px;">
+                My Profile
+              </button>
+            </a>
+        
+            <!-- Cart Button with Popover -->
+            <a href="/cart">
+                <button id="cart" class="btn btn-light position-relative nav-link scrollto bg-danger p-2 m-2 text-white" 
+                    type="button" data-bs-toggle="popover" title="Cart" data-bs-content="Items in your cart" 
+                    style="border-radius: 15px;">
+                    Cart 
+                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" id="cart-count">0</span>
+                </button>
+            </a>
+            {% comment %} Cart {% endcomment %}
+
+              <li>
+              <a class="bg-secondary text-white p-2 m-2" href="/checkout/" style="border-radius: 15px;">
+                <img
+                src="{% static '/assets/img/logo/orders.png'%}" 
+                alt="checkout" class="mx-1 white-icon"
+                style="width: 20px; height: 20px; vertical-align: middle"
+                />Checkout</a>
+            </li>
+            {% comment %} Checkout {% endcomment %}
+            
+            {% if request.user.is_authenticated %}
+            {% comment %} <span>Hello, {{ user.username }}</span> {% endcomment %}
+            <li>
+              <a class="nav-link scrollto bg-primary p-2 m-2" href="/auth/logout/" style="border-radius: 15px;">
+                <img src="{% static '/assets/img/logo/loginlogo.png' %}" 
+                alt="Login" class="mx-1 white-icon"
+                style="width: 20px; height: 20px; vertical-align: middle;"
+                />Logout</a>
+            </li>
+            {% else %}
+        
+              <li>
+                <a class="nav-link scroll bg-primary p-2 m-2" href="/auth/login/" style="border-radius: 15px;">
+                  <img src="{% static '/assets/img/logo/loginlogo.png' %}" 
+                  alt="Login" class="mx-1 white-icon"
+                  style="width: 20px; height: 20px; vertical-align: middle;"
+                  />Login</a>
+              </li>
+            {% endif %}
+                  <li><a class="nav-link scrollto bg-info p-2 m-2" href="/contact" style="border-radius: 18px;">Contact</a></li>
+                  {% comment %} Contact {% endcomment %}
+                  
+                </ul>
+                <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+        </nav>
+      </div>
+    </header>
+
+    <script>
+      function updateCartCount() {
+          fetch("/get_cart_items/")
+              .then(response => response.json())
+              .then(data => {
+                  if (data.cart_items) {
+                      let totalCount = data.cart_items.reduce((total, item) => total + item.quantity, 0);
+                      document.querySelectorAll("#cart-count").forEach(element => {
+                          element.textContent = totalCount;
+                      });
+                  }
+              })
+              .catch(error => console.error("Error fetching cart count:", error));
+      }
+  
+      document.addEventListener("DOMContentLoaded", () => {
+          updateCartCount();
+      });
+  </script>
+
+    <main class="main">
+      <!-- Hero Section -->
+       <section id="hero">
+        {% comment %} <img src="{% static '/assets/images/bgg.jpg'%}" alt="" data-aos="fade-in" /> {% endcomment %}
+        {% comment %} Background Image {% endcomment %}
+ 
+{% block content %}
 {% block body %}
+
+<div class="container">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <form action="/contact" method="POST">
+                {% csrf_token %}
+                
+                <div class="form-group mb-3">
+                    <label for="name">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter Full Name" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" placeholder="Enter Email" required>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your number" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="message">Message</label>
+                    <textarea class="form-control" id="message" name="message" placeholder="Enter Your Message" required></textarea>             
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock body %}
+
+                {% endblock content %}
+                  
+            </div>
+          </div>
+        </div>
+      </section>
+     
 
 <style>
     body {
@@ -14,6 +265,7 @@
         background: #fff;
         padding: 30px 50px;
         border-radius: 15px;
+        margin-top: 20vh;
         box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
         max-width: 900px;
         margin: 50px auto;
@@ -173,100 +425,3 @@
 
     
 </style>
-
-<h1>Contact Us</h1>
-
-<div class="container">
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            <strong>{{ message }}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-
-            <form action="/contact" method="POST">
-                {% csrf_token %}
-                
-                <div class="form-group mb-3">
-                    <label for="name">Full Name</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter Full Name" required>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" placeholder="Enter Email" required>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label for="phone">Phone Number</label>
-                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your number" required>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="message">Message</label>
-                    <textarea class="form-control" id="message" name="message" placeholder="Enter Your Message" required></textarea>             
-                </div>
-                
-                <div class="text-center">
-                    <button type="submit">Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{% endblock body %}
-
-
-{% comment %} 
-<h1 class="text-center mt-2">Contact Us</h1>
-
-<div class="container mt-2">
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            <strong>{{ message }}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-
-    <div class="row">
-        <div class="col-md-4"></div>
-        <div class="col-md-4">
-
-            <form action="/contact" method="POST">
-                {% csrf_token %}
-                
-                <label for="name" class="p-2">Full Name</label>
-                <div class="form-group p-2">
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter Full Name" required>
-                </div>
-
-                <label for="email" class="p-2">Email</label>
-                <div class="form-group p-2">
-                    <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" placeholder="Enter Email" required>
-                </div>
-                
-                <label for="phone" class="p-2">Phone Number</label>  <!-- Changed 'number' to 'phone' for consistency -->
-                <div class="form-group p-2">
-                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your number" required>
-                </div>
-
-                <label for="message" class="p-2">Message</label>
-                <div class="form-group p-2">
-                    <textarea class="form-control" id="message" name="message" placeholder="Enter Your Message" required></textarea>             
-                </div>
-                
-                <div class="text-center p-3">
-                    <button type="submit" class="btn btn-primary text-white w-100">Submit</button>
-                </div>
-            </form>
-
-        </div>
-        <div class="col-md-4"></div>
-    </div>
-</div>
-
-{% endblock body %} {% endcomment %}

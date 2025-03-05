@@ -1,3 +1,4 @@
+{% comment %} {% extends 'base.html' %} {% endcomment %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders</title>
     <style>
+        header {
+            background-color:  #F5F5F7; /* Initially transparent */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 98%;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            height: 10vh;
+            font-weight: bold;
+            color: #111; /* Default text color */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 8px 8px;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            z-index: 1000; /* Ensures it's always above other elements */
+        }
+    
+        /* Left and Center alignment */
+        header .left {
+            position: absolute;
+            left: 20px;
+        }
+    
+        header .center {
+            margin: 0 auto;
+        }
+    
+        /* Change background and text color when scrolled */
+        header.scrolled {
+            background-color: black !important; /* Black background on scroll */
+            color: white !important; /* White text on scroll */
+        }
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
@@ -17,7 +53,8 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: auto;
+            margin-top: 15vh;
+            margin-left: 50vh;
         }
         .order {
             border-bottom: 1px solid #ddd;
@@ -65,9 +102,46 @@
             text-decoration: none;
             border-radius: 5px;
         }
+        #scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #0073e6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: scale(0.8);
+        }
+    
+        #scroll-top.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+    
+        #scroll-top:hover {
+            background: #005bb5;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <a href="/" class="logo d-flex align-items-center">
+            {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
+           <h1 class="logo" href="/">Shopille</h1>
+         </a>
+         <span class="center">Orders</span>
+        <div class="header-right">
+            <span>Hello, {{ user.username }}</span>
+        </div>
+    </header>
 
     <div class="container">
         <h2>My Orders</h2>
@@ -77,47 +151,74 @@
     </div>
 
     <script>
-        window.onload = function () {
-            fetch("/get_orders/")
-                .then(response => response.json())
-                .then(data => {
-                    const ordersContainer = document.getElementById("orders-container");
-                    
-                    if (data.orders.length === 0) {
-                        ordersContainer.innerHTML = "<p>No orders found.</p>";
-                        return;
-                    }
-
-                    ordersContainer.innerHTML = data.orders.map(order => `
-                        <div class="order">
-                            <h3>Order #${order.order_id}</h3>
-                            <p class="order-date">📅 Placed on: ${order.order_date}</p>
-                            <p class="order-status">🚀 Status: ${order.status}</p>
-                            
-                            <div class="order-items">
-                                ${order.items.map(item => `
-                                    <div class="order-item">
-                                        <img src="${item.image_url}" alt="${item.product_name}">
-                                        <div class="order-item-details">
-                                            <p><strong>${item.product_name}</strong></p>
-                                            <p>Quantity: ${item.quantity}</p>
-                                            <p>Price: ₹${item.price}</p>
-                                        </div>
+        fetch("/get_orders/")
+            .then(response => response.json())
+            .then(data => {
+                console.log("Orders Data:", data); // ✅ Debugging step
+    
+                const ordersContainer = document.getElementById("orders-container");
+    
+                if (!data.orders || data.orders.length === 0) {
+                    ordersContainer.innerHTML = "<p>No orders found.</p>";
+                    return;
+                }
+    
+                // Sort orders by order_id in descending order (latest order first)
+                data.orders.sort((a, b) => b.order_id - a.order_id);
+    
+                ordersContainer.innerHTML = data.orders.map(order => `
+                    <div class="order">
+                        <h3>Order #${order.order_id}</h3>
+                        <p class="order-date">📅 Placed on: ${new Date(order.order_date).toLocaleDateString()}</p>
+                        <p class="order-status">🚀 Status: ${order.status}</p>
+                        
+                        <div class="order-items">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <img src="${item.image_url}" alt="${item.product_name}">
+                                    <div class="order-item-details">
+                                        <p><strong>${item.product_name}</strong></p>
+                                        <p>Quantity: ${item.quantity}</p>
+                                        <p>Price: ₹${item.price}</p>
                                     </div>
-                                `).join('')}
-                            </div>
-
-                            <p class="total-amount">Total: ₹${order.total_amount}</p>
-                            <a href="/order_details/${order.order_id}" class="view-order">View Order</a>
+                                </div>
+                            `).join('')}
                         </div>
-                    `).join('');
-                })
-                .catch(error => {
-                    console.error("Error fetching orders:", error);
-                    document.getElementById("orders-container").innerHTML = "<p>Error loading orders.</p>";
+    
+                        <p class="total-amount">Total: ₹${order.amount}</p>
+                        <a href="/order_details/${order.order_id}/" class="view-order">View Order</a>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error("Error fetching orders:", error);
+                document.getElementById("orders-container").innerHTML = "<p>Error loading orders.</p>";
+            });
+            document.addEventListener("DOMContentLoaded", function () {
+                const scrollTopBtn = document.getElementById("scroll-top");
+        
+                // Show/hide button on scroll
+                window.addEventListener("scroll", function () {
+                    if (window.scrollY > 200) {
+                        scrollTopBtn.classList.add("show");
+                    } else {
+                        scrollTopBtn.classList.remove("show");
+                    }
                 });
-        };
+        
+                // Smooth scroll to top when clicked
+                scrollTopBtn.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                });
+            });
     </script>
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top">
+    &#8679; <!-- Unicode arrow (↑) -->
+</a>
+    
 
 </body>
 </html>

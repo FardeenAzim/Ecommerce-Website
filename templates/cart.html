@@ -6,94 +6,276 @@
 
 {% block body %}
 
-<style>
-    /* Custom styles for the cart page */
-    .cart-page {
-        display: flex;
-        justify-content: space-between;
-        margin: 20px;
+{% comment %} <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f8f8;
     }
-    .cart-section {
-        flex: 1;
-        margin-right: 20px;
-    }
-    .price-details {
-        flex-basis: 300px;
-        border: 1px solid #ddd;
-        padding: 20px;
-        background-color: #fff;
-    }
-
     header {
         display: flex;
         justify-content: space-between;
-        text-align: left;
-        padding: 20px;
+        align-items: center;
+        padding: 15px 30px;
         background-color: #7d298f;
         color: white;
-        font-size: 24px;
+        font-size: 20px;
     }
-
-    .cart-item-row {
-        display: flex;
-        justify-content: space-between;
+    .cart-container {
+        display: flex-inline;
+    }
+    .cart-item {
+        display: flex-inline;
         align-items: center;
-        background-color: #f8f8f8;
-        padding: 10px;
+        background: white;
+        padding: 15px;
         margin-bottom: 10px;
         border-radius: 5px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        flex-wrap: wrap; /* Allow items to wrap if necessary */
     }
+    
+    .cart-item img {
+        width: 120px;
+        height: 120px;
+        border-radius: 5px;
+        object-fit: cover;
+    }
+    
+    .item-details {
+        flex: 1;
+        margin-left: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+    }
+    
+    .price-remove {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    
+    .remove-btn {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-top: 5px;
+    }
+    
+    .price-summary {
+        flex-basis: 250px;
+        padding: 20px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .buy-now, .clear-cart {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+        border-radius: 5px;
+    }
+    .buy-now {
+        background: #4caf50;
+        color: white;
+    }
+    .clear-cart {
+        background: #f44336;
+        color: white;
+    }
+</style> {% endcomment %}
+
+<style>
+    /* General Styles */
+   /* Fixed Header */
+    header {
+        background-color:  #F5F5F7; /* Initially transparent */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #111; /* Default text color */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 8px 8px;
+        transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+        z-index: 1000; /* Ensures it's always above other elements */
+    }
+
+    /* Left and Center alignment */
+    header .left {
+        position: absolute;
+        left: 20px;
+    }
+
+    header .center {
+        margin: 0 auto;
+    }
+
+    /* Change background and text color when scrolled */
+    header.scrolled {
+        background-color: black !important; /* Black background on scroll */
+        color: white !important; /* White text on scroll */
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f8f8;
+        margin: 0;
+        padding: 0;
+    }
+    .cart-page {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        margin-top: 20vh;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-container {
+        display: flex;
+        flex-direction: column;
+    }
+
     .cart-item {
         display: flex;
         align-items: center;
-        width: 100%;
+        justify-content: space-between;
+        background: white;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
     }
+
+    .cart-item img {
+        width: 100px;
+        height: 100px;
+        border-radius: 5px;
+        object-fit: cover;
+    }
+
     .item-details {
-        flex: 2;
-        margin-left: 20px;
+        flex: 1;
+        margin-left: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
-    .quantity-section {
+
+    .quantity-controls {
         display: flex;
         align-items: center;
-        gap: 10px;
-        flex: 1;
         justify-content: center;
-        margin-left: 280px; /* Ensure spacing from quantity section */
+        flex: 1;
     }
-    .remove-item-btn {
-        background-color: #f44336;
+
+    .quantity-controls button {
+        width: 30px;
+        height: 30px;
+        border: none;
+        background: #7d298f;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        margin: 0 5px;
+        border-radius: 5px;
+    }
+
+    .quantity-controls span {
+        font-size: 18px;
+        font-weight: bold;
+        padding: 0 10px;
+    }
+
+    .price-remove {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .remove-btn {
+        background: #f44336;
         color: white;
         border: none;
         padding: 5px 10px;
         cursor: pointer;
         border-radius: 5px;
-        flex-basis: 100px; /* Fixed width for remove button */
-        margin-left: 440px; /* Ensure spacing from quantity section */
+        font-size: 14px;
+        margin-top: 5px;
     }
-    .remove-item-btn:hover {
-        background-color: #d32f2f;
+
+    /* Price Section */
+    .price-details {
+        margin-top: 20px;
+        padding: 20px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
-    .price-summary {
-        margin-bottom: 20px;
+
+    .price-summary p {
+        font-size: 16px;
+        font-weight: bold;
     }
-    .buy-now-btn,
-    .clear-cart-btn {
-        background-color: #4caf50;
-        color: white;
+
+    /* Buttons */
+    .buy-now-btn, .clear-cart-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
         border: none;
-        padding: 10px 15px;
         cursor: pointer;
-        margin-right: 10px;
+        text-align: center;
+        border-radius: 5px;
+        font-size: 16px;
     }
+
+    .buy-now-btn {
+        background: #4caf50;
+        color: white;
+    }
+
     .clear-cart-btn {
-        background-color: #f44336;
+        background: #f44336;
+        color: white;
+    }
+
+    /* Empty Cart Message */
+    .empty-cart {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 20px;
+        color: gray;
     }
 </style>
 
 <header>
-    <div>Shopille</div>
+    <a href="/" class="logo d-flex align-items-center">
+        {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
+       <h1 class="logo" href="/">Shopille</h1>
+     </a>
+     <span class="center">Cart</span>
     <div class="header-right">
         <span>Hello, {{ user.username }}</span>
     </div>
@@ -101,9 +283,9 @@
 
 <div class="cart-page">
 
-    <div class="cart-section">
+    <div class="cart-container">
         <h1>Your Cart</h1>
-        <div class="container" id="cart-items">
+        <div class="cart-items" id="cart-items">
             <!-- Cart items will be dynamically injected here using JavaScript -->
         </div>
     </div>
@@ -126,387 +308,139 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-{% comment %} <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const cartItemsContainer = document.getElementById('cart-items');
-        const itemCountElement = document.getElementById('item-count');
-        const totalAmountElement = document.getElementById('total-amount');
-        const buyNowBtn = document.getElementById('buy-now-btn');
-        const clearCartBtn = document.getElementById('clear-cart-btn');
-
-        let cart = [];  // Empty cart at first, will fetch from the backend.
-
-        // Function to update cart display
-        function updateCartDisplay() {
-            let totalAmount = 0;
-            let itemPrice = 0;
-            let totalItems = 0;
-            cartItemsContainer.innerHTML = '';
-
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
-            } else {
-                cart.forEach((item) => {
-                    const itemTotalPrice = item.price * item.quantity;
-                    itemPrice += itemTotalPrice;
-                    totalAmount += itemTotalPrice;
-                    totalItems += item.quantity;
-
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'cart-item-row';
-                    itemDiv.innerHTML = `
-                        <img src="${item.image}" alt="${item.name}" height="80" width="80">
-                        <div class="item-details">
-                            <h5>${item.name}</h5>
-                            <p>Price per item: ₹${item.price}</p>
-                        </div>
-                        <div class="quantity-section">
-                            <button onclick="updateQuantity(${item.id}, -1)">-</button>
-                            <span>${item.quantity}</span>
-                            <button onclick="updateQuantity(${item.id}, 1)">+</button>
-                        </div>
-                        <button class="remove-item-btn" onclick="removeFromCart(${item.id})">Remove</button>
-                        <p>Total: ₹${itemTotalPrice}</p>
-                    `;
-                    cartItemsContainer.appendChild(itemDiv);
-                });
-            }
-
-            // Update the subtotal and total amount in the DOM
-            itemCountElement.textContent = totalItems;      // Total item count
-            document.getElementById('item-price').textContent = itemPrice; // Subtotal
-            totalAmountElement.textContent = totalAmount;   // Total amount (same as subtotal here, unless taxes/discounts are added)
-
-            itemCountElement.textContent = totalItems;
-            totalAmountElement.textContent = totalAmount;
-        }
-
-        // Fetch the cart data from the server and initialize
-        fetch("/get-cart-items/")
-            .then(response => response.json())
-            .then(data => {
-                if (data.cart_items) {
-                    cart = data.cart_items;  // Update cart data
-                    updateCartDisplay();
-                } else {
-                    cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
-                }
-            });
-
-        // Function to handle item quantity updates
-        window.updateQuantity = function(productId, delta) {
-            const item = cart.find(item => item.id === productId);
-            if (item) {
-                item.quantity += delta;
-                if (item.quantity < 1) item.quantity = 1;  // Prevent negative quantities
-                updateCartDisplay();
-
-                // Update quantity on the backend
-                fetch("/update-quantity/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": getCookie("csrftoken"),
-                    },
-                    body: JSON.stringify({ product_id: productId, quantity: item.quantity }),
-                }).then(response => response.json())
-                  .then(data => {
-                      if (data.message) {
-                          updateCartDisplay(); // Update cart display after the backend responds
-                      } else {
-                          alert(data.error);
-                      }
-                  });
-            }
-        };
-
-        // Function to remove an item from the cart
-        window.removeFromCart = function(productId) {
-            cart = cart.filter(item => item.id !== productId);
-            updateCartDisplay();
-
-            fetch("/remove-from-cart/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: JSON.stringify({ product_id: productId }),
-            }).then(response => response.json())
-              .then(data => {
-                  if (!data.message) {
-                      alert(data.error);
-                  }
-              });
-        };
-
-        // Clear the cart
-        clearCartBtn.addEventListener('click', () => {
-            fetch('/clear-cart/', { method: 'POST' })
-                .then(response => response.json())
-                .then(() => {
-                    cart = [];
-                    updateCartDisplay();
-                });
-        });
-
-
-
-        // Redirect to checkout page when "Buy Now" is clicked
-        buyNowBtn.addEventListener('click', () => {
-            if (cart.length > 0) {
-                const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-                 // Save cart data in session
-        fetch('/save-cart-session/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ cart, totalAmount }),
-        })
-        .then(response => {
-            if (response.ok) {
-                // Redirect to the checkout page after successfully saving the session
-                window.location.href = `/checkout?amount=${totalAmount}`;
-            } else {
-                alert('Failed to proceed to checkout. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error during checkout:', error);
-                    alert('An unexpected error occurred. Please try again later.');
-                });
-            } else {
-                alert("Your cart is empty. Please add items to the cart.");
-            }
-        });
-            
-
-        // Helper function to get CSRF token
-        function getCookie(name) {
-            const value = document.cookie.match(`(^|;)\\s*${name}\\s*=\\s*([^;]+)`);
-            return value ? value.pop() : '';
-        }
-    });
-</script> {% endcomment %}
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const cartItemsContainer = document.getElementById('cart-items');
-        const itemCountElement = document.getElementById('item-count');
-        const totalAmountElement = document.getElementById('total-amount');
-        const buyNowBtn = document.getElementById('buy-now-btn');
-        const clearCartBtn = document.getElementById('clear-cart-btn');
-
-        let cart = [];  // Will hold cart data fetched from the server.
-
-        // Function to update cart display
+        const cartItemsContainer = document.getElementById("cart-items");
+        const itemCountElement = document.getElementById("item-count");
+        const totalAmountElement = document.getElementById("total-amount");
+        const itemPriceElement = document.getElementById("item-price");
+        const buyNowButton = document.getElementById("buy-now-btn");
+        const clearCartButton = document.getElementById("clear-cart-btn");
+    
         function updateCartDisplay() {
-            let totalAmount = 0;
-            let totalItems = 0;
-            cartItemsContainer.innerHTML = '';
-
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
-            } else {
-                cart.forEach((item) => {
-                    const itemTotalPrice = item.price;
-                    totalAmount += itemTotalPrice;
-                    totalItems += item.quantity;
-
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'cart-item-row';
-                    itemDiv.innerHTML = `
-                        <img src="${item.image_url}" alt="${item.product_name}" height="80" width="80">
-                        <div class="item-details">
-                            <h5>${item.product_name}</h5>
-                            <p>Price per item: ₹${item.price}</p>
-                        </div>
-                        <div class="quantity-section">
-                            <button onclick="updateQuantity(${item.id}, -1)">-</button>
-                            <span>${item.quantity}</span>
-                            <button onclick="updateQuantity(${item.id}, 1)">+</button>
-                        </div>
-                        <button class="remove-item-btn" onclick="removeFromCart(${item.id})">Remove</button>
-                        <p>Total: ₹${itemTotalPrice}</p>
-                    `;
-                    cartItemsContainer.appendChild(itemDiv);
+            fetch("/get_cart_items/")
+                .then(response => response.json())
+                .then(data => {
+                    const cart = data.cart_items;
+                    cartItemsContainer.innerHTML = "";
+    
+                    if (cart.length === 0) {
+                        cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
+                        totalAmountElement.textContent = "0";
+                        itemCountElement.textContent = "0";
+                        itemPriceElement.textContent = "0";
+                        return;
+                    }
+    
+                    let totalPrice = 0;
+                    let totalItems = 0;
+    
+                    cart.forEach((item) => {
+                        totalPrice += item.price * item.quantity;
+                        totalItems += item.quantity;
+    
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add("cart-item");
+                        itemDiv.innerHTML = `
+                            <img src="${item.image_url}" alt="${item.product_name}">
+                            <div class="item-details">
+                                <h5>${item.product_name}</h5>
+                            </div>
+                            <div class="quantity-controls">
+                                <button onclick="updateQuantity(${item.cart_item_id}, 'decrease')">-</button>
+                                <span id="quantity-${item.cart_item_id}">${item.quantity}</span>
+                                <button onclick="updateQuantity(${item.cart_item_id}, 'increase')">+</button>
+                            </div>
+                            <div class="price-remove">
+                                <p>₹${item.price * item.quantity}</p>
+                                <button class="remove-btn" onclick="removeFromCart(${item.cart_item_id})">Remove</button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(itemDiv);
+                    });
+    
+                    itemCountElement.textContent = totalItems;
+                    itemPriceElement.textContent = totalPrice;
+                    totalAmountElement.textContent = totalPrice;
                 });
-            }
-
-            // Update the subtotal and total amount in the DOM
-            itemCountElement.textContent = totalItems;      // Total item count
-            totalAmountElement.textContent = totalAmount;   // Total amount
         }
     
-        // Fetch the cart data from the server and initialize
-        fetch("/get_cart_items/")
+        window.updateQuantity = function (cartItemId, action) {
+            let endpoint = action === "increase" ? "/increase-quantity/" : "/decrease-quantity/";
+    
+            fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+                body: JSON.stringify({ cart_item_id: cartItemId })
+            })
             .then(response => response.json())
             .then(data => {
-                if (data.cart_items) {
-                    cart = data.cart_items;  // Update cart data
-                    updateCartDisplay();
-                } else {
-                    cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
-                }
-            });
-
-        // Function to handle item quantity updates
-        window.updateQuantity = function (productId, delta) {
-            const item = cart.find(item => item.id === productId);
-            if (item) {
-                item.quantity += delta;
-                if (item.quantity < 1) item.quantity = 1;  // Prevent negative quantities
                 updateCartDisplay();
-
-                // Update quantity on the backend
-                fetch("/update-quantity/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": getCookie("csrftoken"),
-                    },
-                    body: JSON.stringify({ product_id: productId, quantity: item.quantity }),
-                }).then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            updateCartDisplay(); // Update cart display after the backend responds
-                        } else {
-                            alert(data.error);
-                        }
-                    });
-            }
+            })
+            .catch(error => console.error("Error updating quantity:", error));
         };
-
-        // Function to remove an item from the cart
-        window.removeFromCart = function (productId) {
-            cart = cart.filter(item => item.id !== productId);
-            updateCartDisplay();
-
+    
+        window.removeFromCart = function (cartItemId) {
             fetch("/remove-from-cart/", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: JSON.stringify({ product_id: productId }),
-            }).then(response => response.json())
-                .then(data => {
-                    if (!data.message) {
-                        alert(data.error);
-                    }
-                });
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+                body: JSON.stringify({ cart_item_id: cartItemId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateCartDisplay();
+            })
+            .catch(error => console.error("Error removing item:", error));
         };
-
-        // Function to increase the quantity of an item in the cart
-     window.increaseQuantity = function (productId) {
-    const item = cart.find(item => item.id === productId);
-    if (item) {
-        item.quantity += 1;  // Increase the quantity by 1
-        updateCartDisplay();  // Update the UI with the new cart data
-
-        // Send updated cart data to the backend (save it in session)
-        fetch("/update-cart-session/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: JSON.stringify({
-                product_id: productId,
-                action: "increase",  // Indicating we want to increase the quantity
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert(data.error || "Error updating cart.");
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    }
-  };
-
-    // Function to decrease the quantity of an item in the cart
-    window.decreaseQuantity = function (productId) {
-        const item = cart.find(item => item.id === productId);
-        if (item && item.quantity > 1) {
-        item.quantity -= 1;  // Decrease the quantity by 1
-        updateCartDisplay();  // Update the UI with the new cart data
-
-        // Send updated cart data to the backend (save it in session)
-        fetch("/update-cart-session/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: JSON.stringify({
-                product_id: productId,
-                action: "decrease",  // Indicating we want to decrease the quantity
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert(data.error || "Error updating cart.");
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    }
-};
-
-        // Clear the cart
-        clearCartBtn.addEventListener('click', () => {
-            fetch('/clear-cart/', { method: 'POST' })
-                .then(response => response.json())
-                .then(() => {
-                    cart = [];
-                    updateCartDisplay();
-                });
+    
+        window.clearCart = function () {
+            fetch("/clear-cart/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateCartDisplay();
+            })
+            .catch(error => console.error("Error clearing cart:", error));
+        };
+    
+        buyNowButton.addEventListener("click", function () {
+            window.location.href = "/checkout/";
         });
-
-        // Redirect to checkout page when "Buy Now" is clicked
-        buyNowBtn.addEventListener('click', () => {
-            if (cart.length > 0) {
-                const totalAmount = cart.reduce((acc, item) => acc + item.price, 0);
-
-                // Save cart data in session
-                fetch('/save-cart-session/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken'),
-                    },
-                    body: JSON.stringify({ cart, totalAmount }),
-                })
-                    .then(response => {
-                        if (response.ok) {
-                            // Redirect to the checkout page after successfully saving the session
-                            window.location.href = `/checkout`;
-                        } else {
-                            alert('Failed to proceed to checkout. Please try again.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error during checkout:', error);
-                        alert('An unexpected error occurred. Please try again later.');
-                    });
-            } else {
-                alert("Your cart is empty. Please add items to the cart.");
-            }
+    
+        clearCartButton.addEventListener("click", function () {
+            clearCart();
         });
-
-        // Helper function to get CSRF token
+    
         function getCookie(name) {
-            const value = document.cookie.match(`(^|;)\\s*${name}\\s*=\\s*([^;]+)`);
-            return value ? value.pop() : '';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
+        updateCartDisplay();
+        document.addEventListener("DOMContentLoaded", function () {
+            const header = document.querySelector("header");
+        
+            window.addEventListener("scroll", function () {
+                if (window.scrollY > 50) { // When scrolled 50px down
+                    header.classList.add("scrolled");
+                } else {
+                    header.classList.remove("scrolled");
+                }
+            });
+        });
     });
+    
 </script>
 
-
-
 {% endblock body %}
-

@@ -1,3 +1,4 @@
+{% comment %} {% extends 'base.html' %} {% endcomment %}
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
@@ -13,9 +14,10 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px;
-            background-color: #7d298f;
+            background-color:rgb(198, 198, 241);
             color: white;
             font-size: 24px;
+            height: 6vh;
             position: relative;
             z-index: 1000;
             margin-top: -8px;
@@ -112,7 +114,10 @@
 </head>
 <body>
 <header>
-    <div>Shopille</div>
+    <a href="/" class="logo d-flex align-items-center">
+        {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
+       <h1 class="logo" href="/">Shopille</h1>
+     </a>
     <div class="header-right">
         {% if user.is_authenticated %}
         <!-- Username Display -->
@@ -153,7 +158,11 @@
 
             <div class="mt-2">
                 <button class="btn btn-danger btn-lg" onclick="addToCart({{ product.id }})" style="border-radius: 20px;">Add to Cart</button>
-                <button class="btn btn-warning btn-lg ml-2" onclick="buyNow({{ product.id }})" style="border-radius: 20px;">Buy Now</button>
+                {% comment %} <button class="btn btn-warning btn-lg ml-2" onclick="buyNow({{ product.id }})" style="border-radius: 20px;">Buy Now</button> {% endcomment %}
+                <button class="btn btn-warning btn-lg ml-2" onclick="buyNow({{ product.id }}, {{ product.price }})" style="border-radius: 20px;">
+                    Buy Now
+                </button>
+                
             </div>
         </div>
     </div>
@@ -185,69 +194,56 @@
         cartCountElement.textContent = cartCount;
     }
 
-    // Function to fetch and update the cart sidebar with server data
+    // Fetch and update cart sidebar UI
     function updateCartSidebar() {
-        fetch("/get_cart_items/") // Get cart data from the server
+        fetch("/get_cart_items/") // Fetch updated cart data
             .then(response => response.json())
             .then(data => {
                 if (data.cart_items) {
-                    cart = data.cart_items; // Update local cart state
-                    renderCartItems();
+                    cart = data.cart_items; // Update local state
+                    renderCartItems(); // Update UI
                 } else {
                     document.getElementById("cart-items").innerHTML = `<p>${data.error}</p>`;
                 }
             });
     }
 
-    // Function to render cart items on the client side
     function renderCartItems() {
-        console.log(cart); // Log the cart object for debugging
         const cartItemsContainer = document.getElementById("cart-items");
         const cartTotalElement = document.getElementById("cart-total");
-
+    
         cartItemsContainer.innerHTML = "";
         let total = 0;
-
+    
         cart.forEach(item => {
-            total += item.price;
-
+            total += item.price * item.quantity;
+    
             cartItemsContainer.innerHTML += `
-                <div class="cart-item" id="cart-item-${item.id}">
+                <div class="cart-item" id="cart-item-${item.cart_item_id}">
                     <img src="${item.image_url}" alt="${item.product_name}" style="width: 50px; height: 50px;">
                     <div>
                         <p>${item.product_name}</p>
                         <p>Price: ₹${item.price}</p>
                         <div>
-                            <button onclick="decreaseQuantity(${item.id})">-</button>
+                            <button onclick="decreaseQuantity(${item.cart_item_id})">-</button>
                             <span>${item.quantity}</span>
-                            <button onclick="increaseQuantity(${item.id})">+</button>
+                            <button onclick="increaseQuantity(${item.cart_item_id})">+</button>
                         </div>
-                        <button onclick="removeFromCart(${item.id})">Remove</button>
+                        <button onclick="removeFromCart(${item.cart_item_id})">Remove</button>
                     </div>
                 </div>
                 <hr>
             `;
         });
-
+    
         cartTotalElement.textContent = `₹${total}`;
         updateCartCount();
     }
+    
 
     // Function to add a product to the cart
     function addToCart(productId, productName, productPrice, productImage) {
-        const existingItem = cart.find(item => item.id === productId);
-
-        if (existingItem) {
-            existingItem.quantity += 1; // Update quantity locally
-        } else {
-            cart.push({ id: productId, name: productName, price: productPrice, image: productImage, quantity: 1 });
-        }
-
-        renderCartItems(); // Update UI
-        updateCartCount();
-
-        // Sync with backend
-        fetch("/add-to-cart/", {
+        fetch(`/add-to-cart/${productId}/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -256,94 +252,77 @@
             body: JSON.stringify({ product_id: productId }),
         }).then(response => response.json())
             .then(data => {
-                if (!data.message) {
+                if (data.message) {
+                    updateCartSidebar();
+                    updateCartCount(); // Sync with base.html
+                } else {
                     alert(data.error);
                 }
             });
     }
-
-    // Function to remove a product from the cart
-    function removeFromCart(productId) {
-        cart = cart.filter(item => item.id !== productId); // Remove locally
-        renderCartItems(); // Update UI
-
-        // Sync with backend
+    
+    function removeFromCart(cartItemId) {
         fetch("/remove-from-cart/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
             },
-            body: JSON.stringify({ product_id: productId }),
-        }).then(response => response.json())
-            .then(data => {
-                if (!data.message) {
-                    alert(data.error);
-                }
-            });
-    }
-
-    // Function to increase item quantity
-    function increaseQuantity(productId) {
-        const item = cart.find(item => item.id === productId);
-        if (item) {
-            item.quantity += 1; // Update locally
-            renderCartItems(); // Update UI
-
-            // Sync with backend
-            fetch("/increase-quantity/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: JSON.stringify({ product_id: productId }),
-            }).then(response => response.json())
-                .then(data => {
-                    if (!data.message) {
-                        alert(data.error);
-                    }
-                });
-        }
-    }
-
-    // Function to decrease item quantity
-    function decreaseQuantity(productId) {
-        const item = cart.find(item => item.id === productId);
-        if (item) {
-            if (item.quantity > 1) {
-                item.quantity -= 1; // Decrease locally
-                renderCartItems(); // Update UI
-
-                // Sync with backend
-                fetch("/decrease-quantity/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": getCookie("csrftoken"),
-                    },
-                    body: JSON.stringify({ product_id: productId }),
-                }).then(response => response.json())
-                    .then(data => {
-                        if (!data.message) {
-                            alert(data.error);
-                        }
-                    });
+            body: JSON.stringify({ cart_item_id: cartItemId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                updateCartSidebar();
+                updateCartCount(); // Sync with base.html
             } else {
-                removeFromCart(productId); // Remove if quantity becomes 0
+                alert("Failed to remove item from cart: " + data.error);
             }
-        }
+        });
     }
-
-    // Function to handle "Buy Now" button
-    function buyNow(productId) {
-        const item = cart.find(item => item.id === productId);
-        if (item) {
-            // Redirect to checkout page with product details
-            window.location.href = `checkout/?product_id=${productId}&price=${item.price}&quantity=${item.quantity}`;
-        }
+    
+    function increaseQuantity(cartItemId) {
+        fetch("/increase-quantity/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ cart_item_id: cartItemId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                updateCartSidebar();
+                updateCartCount(); // Sync with base.html
+            } else {
+                alert(data.error);
+            }
+        });
     }
-
+    
+    function decreaseQuantity(cartItemId) {
+        fetch("/decrease-quantity/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ cart_item_id: cartItemId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                updateCartSidebar();
+                updateCartCount(); // Sync with base.html
+            } else {
+                alert(data.error);
+            }
+        });
+    }
+    function buyNow(productId, productPrice) {
+        window.location.href = `/checkout/?product_id=${productId}&price=${productPrice}&quantity=1`;
+    }
     // Initial page load
     document.addEventListener("DOMContentLoaded", () => {
         updateCartSidebar();

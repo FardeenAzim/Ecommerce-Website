@@ -1,7 +1,7 @@
 # Register your models here.
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, UserProfile, Product, Cart, CartItem, Contact, Address, Order, Payment
+from .models import CustomUser, Profile, Product, Cart, CartItem, Contact, Address, Order, OrderItem, Payment
 
 # Register CustomUser with custom admin configuration
 class CustomUserAdmin(UserAdmin):
@@ -25,11 +25,12 @@ class CustomUserAdmin(UserAdmin):
 
 # Register other models
 admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(UserProfile)
+admin.site.register(Profile)
 admin.site.register(Product)
 admin.site.register(Cart)
 admin.site.register(CartItem)
 admin.site.register(Contact)
 admin.site.register(Address)
 admin.site.register(Order)
+admin.site.register(OrderItem)
 admin.site.register(Payment)

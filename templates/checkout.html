@@ -5,11 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout Page</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token }}">
 </head>
 <body>
     <header>
-        <span class="left">Shopille</span>
+        <a href="/" class="logo d-flex align-items-center">
+            {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
+           <h1 class="logo" href="/">Shopille</h1>
+         </a>
         <span class="center">Checkout</span>
+        <div class="header-right">
+            <span>Hello, {{ user.username }}</span>
+        </div>
     </header>
     <div class="container my-4">
         <!-- Step 1: Select a delivery address -->
@@ -18,7 +25,7 @@
             <div class="card"> 
                 <form id="checkout-form" method="post" action="checkout">
                     {% csrf_token %}
-                    <input type="hidden" id="amount" name="amount" value="{{ amount }}"> <!-- Hidden input for amount -->
+                    {% comment %} <input type="hidden" id="amount" name="amount" value="{{ amount }}"> <!-- Hidden input for amount --> {% endcomment %}
                     <div class="col-md-12">
                         <label for="name" class="form-label">Enter Name</label>
                         <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" required>
@@ -54,13 +61,9 @@
             </div>
         </div>
          <!-- Saved addresses display section -->
-         <div id="savedAddressesSection" class="form-section mt-4 hidden">
+         <div id="savedAddressesSection" class="form-section mt-4 ">
             <h4 class="section-title">SELECT A DELIVERY ADDRESS</h4>
             <div id="savedAddresses" class="address-card">
-                <div class="address-actions">
-                    <button id="changeAddressButton" class="btn btn-change">Change</button>
-                    <button id="addNewAddressButton" class="btn btn-add-new">Add a new address</button>
-                </div>
             </div>
         </div> 
         <div class="container my-4"> 
@@ -69,56 +72,75 @@
                 <h4 class="section-title">ORDER SUMMARY</h4>
                 <div class="card">
                     <div id="cartItemsContainer" class="order-summary mt-3">
-                    {% for item in cart_items %}
-                        <li>
-                            <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" width="50">
-                            <strong>{{ item.product.product_name }}</strong>
-                            <p>Quantity: {{ item.quantity }}</p>
-                            <p>Price: ₹{{ item.product.price }}</p>
-                        </li>
-                    {% endfor %}
+                    <!-- Single Product Checkout -->
+                    {% if single_product %}
+                    <div class="card p-3">
+                        <h4>Product Checkout</h4>
+                        <img src="{{ single_product.image.url }}" width="100">
+                        <p><strong>{{ single_product.product_name }}</strong></p>
+                        <p>Quantity: {{ quantity }}</p>
+                        <p>Price: ₹{{ single_product.price }}</p>
+                        <p>Total Price: ₹{{ amount }}</p>
+                    </div>
+                    
+                    {% else %}
+                    <!-- Cart Checkout -->
+                    <div class="card p-3">
+                        <h4>Cart Checkout</h4>
+                        <ul>
+                            {% for item in cart_items %}
+                            <li>
+                                <img src="{{ item.product.image.url }}" width="50">
+                                <strong>{{ item.product.product_name }}</strong>
+                                <p>Quantity: {{ item.quantity }}</p>
+                                <p>Price: ₹{{ item.product.price }}</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
                     </div>
                     <div class="order-summary mt-3">
                         <h5>Order Summary</h5>
                         <div class="d-flex justify-content-between">
-                            <h5>Total Product Price: ₹<span id="total-amount">0</span></h5>
+                            <h5>Total Product Price: <span id="total-amount">{{ amount }}</span></h5>
                         </div>
                         <hr>
                         <label for="selectedDeliveryDate" style="display: inline-flex; align-items: center; gap: 10px;">
-                            
                             <p style="margin: 0;">Expected delivery date: <input type="radio" name="deliveryDate" id="selectedDeliveryDate" checked style="margin: 0;"> <span id="deliveryDate"></span></p>
                         </label>
                     </div>
                 </div>
             </div>
         </div>   
-        <!-- Payment section -->
-        <div id="paymentSection" class="mb-4 hidden">
-            <h4 class="section-title">PAYMENT METHOD</h4>
-            {% comment %} <button class="btn btn-secondary mb-2" id="applyCouponButton">Apply Coupon</button> {% endcomment %}
-            <button class="btn btn-primary mb-2" id="payWithRazorpay" value="Razorpay">Pay with Razorpay</button>
-            <button class="btn btn-primary mb-2" id="codOption" value="COD">Cash on Delivery</button>
-            
-        </div>
-        <!-- Confirmation Section (Visible after Payment Option Selected) -->
-        <div id="confirmationSection" class="mb-4 hidden">
-            <h4 class="section-title">SELECTED PAYMENT OPTION</h4>
-            <div class="card">
-                <label for="selectedPayment" style="display: inline-flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="paymentOption" id="selectedPayment" checked> <span id="paymentConfirmationText"></span>
-                </label>
+        <div class="container mt-4">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">Select Payment Method</button>
+                </div>
+         <!-- Payment Modal -->
+     <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Payment Method</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Select a payment method to proceed:</p>
+                    <button class="btn btn-outline-primary w-100 mb-2" onclick="processPayment('COD')">Cash on Delivery</button>
+                    <button class="btn btn-outline-success w-100" if="payWithRazorpay" onclick="processPayment('Razorpay')">Razorpay</button>
+                </div>
             </div>
-            <button id="changePaymentButton" class="btn btn-warning mt-2">Change Payment Option</button>
-            <button id="placeOrderButton" type="submit" class="btn btn-warning mt-3">Place Order</button>
         </div>
+    </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const checkoutForm = document.getElementById('checkout-form');
                 const savedAddressesSection = document.getElementById('savedAddressesSection');
                 const savedAddresses = document.getElementById('savedAddresses');
                 const formSection = document.getElementById('form-section');
-                const paymentSection = document.getElementById('paymentSection');
+                const paymentModal = document.getElementById('paymentModal');
                 const confirmationSection = document.getElementById('confirmationSection');
                 const orderSummarySection = document.getElementById('orderSummarySection');
                 const cashOnDeliveryButton = document.getElementById('codOption');
@@ -131,7 +153,6 @@
                 const deliveryDateElement = document.getElementById("deliveryDate");
                 let selectedAddress = null;
                 let totalAmount = 0
-            
                 // Fetch saved addresses
                 fetch('/get_saved_addresses/')
                     .then(response => response.json())
@@ -142,12 +163,10 @@
                             showAddressForm();
                         }
                     });
-            
                 // Function to display saved addresses
                 function displaySavedAddresses(addresses) {
                     formSection.classList.add("hidden");
                     savedAddressesSection.classList.remove("hidden");
-
                     savedAddresses.innerHTML = addresses
                         .map(
                             (address) => `
@@ -162,10 +181,8 @@
                             </label>`
                         )
                         .join("") +
-                        `<button id="changeAddressButton" class="btn">Change</button>
-                        <button id="addNewAddressButton" class="btn">Add New Address</button>
-                        <button id="useAddressButton" class="btn btn-primary">Use This Address</button>`;
-
+                        `<button id="changeAddressButton" class="btn btn-secondary">Change</button>
+                        <button id="addNewAddressButton" class="btn btn-info">Add New Address</button>`;
                     document.querySelectorAll('input[name="address"]').forEach((radio) => {
                         radio.addEventListener("change", () => {
                             selectedAddress = JSON.parse(radio.dataset.details);
@@ -173,7 +190,6 @@
                             displayOrderSummary();
                         });
                     });
-
         // Add event listeners for Change and Add New Address buttons
         document.getElementById("changeAddressButton").addEventListener("click", () => {
             if (selectedAddress) {
@@ -183,12 +199,10 @@
                 alert("Please select an address to change.");
             }
         });
-
         document.getElementById("addNewAddressButton").addEventListener("click", () => {
             checkoutForm.reset();
             showAddressForm();
         });
-
         document.getElementById("useAddressButton").addEventListener("click", () => {
             if (selectedAddress) {
                 orderSummarySection.classList.remove("hidden");
@@ -198,7 +212,6 @@
             }
         });
     }
-
     // Function to populate the address form for editing
     function populateForm(address) {
         checkoutForm.elements["name"].value = address.name;
@@ -209,17 +222,14 @@
         checkoutForm.elements["state"].value = address.state;
         checkoutForm.elements["zip_code"].value = address.zip_code;
     }
-
     // Function to show the address form
     function showAddressForm() {
         savedAddressesSection.classList.add("hidden");
         formSection.classList.remove("hidden");
     }
-
     // Handle address form submission
     checkoutForm.addEventListener("submit", function (event) {
         event.preventDefault();
-
         const formData = new FormData(checkoutForm);
         fetch("/save_address/", {
             method: "POST",
@@ -236,161 +246,142 @@
             })
             .catch((error) => console.error("Error saving address:", error));
     });
-
-    // Fetch & display order summary
-    function displayOrderSummary() {
-        fetch("/get_cart_items/")
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.total_amount !== undefined) {
-                    totalAmount = data.total_amount;
-                    totalAmountElement.innerText = `${totalAmount.toFixed(2)}`;
-                }
-
-                if (cartItemsContainer) {
-                    cartItemsContainer.innerHTML = data.cart_items
-                        .map(
-                            (item) => `
-                        <div class="order-item">
-                            <img src="${item.image_url}" alt="${item.product_name}" class="order-item-image">
-                            <div class="order-item-details">
-                                <p><strong>${item.product_name}</strong></p>
-                                <p>Quantity: ${item.quantity}</p>
-                                <p>Price: ₹${item.price}</p>
-                            </div>
-                        </div>
-                    `
-                        )
-                        .join("");
-                }
-
-                paymentSection.classList.remove("hidden");
-            })
-            .catch((error) => console.error("Error fetching cart items:", error));
-    }
-
-            
-                // Handle Razorpay Payment Selection
-                razorpayButton?.addEventListener("click", function () {
-                    if (totalAmount <= 0) {
-                        alert("Invalid payment amount. Please check your cart.");
-                        return;
-                    }
-                    localStorage.setItem("paymentMethod", "Razorpay");
-                    window.location.href = `/razorpay_payment/?amount=${totalAmount}`;
-                });
-            
-                // Handle COD Selection
-                cashOnDeliveryButton?.addEventListener("click", function () {
-                    localStorage.setItem("paymentMethod", "Cash on Delivery");
-                    showConfirmationSection("Cash on Delivery");
-                });
-            
-                // Show Confirmation Section
-                function showConfirmationSection(paymentMethod) {
-                    if (!paymentConfirmationText) return;
-                    paymentConfirmationText.innerText = `${paymentMethod}`;
-                    confirmationSection.classList.remove("hidden");
-                    paymentSection.classList.add("hidden");
-                    orderSummarySection.classList.remove("hidden");
-                }
-            
+    // Function to fetch and display order summary
+        function displayOrderSummary() {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get("product_id");
+            const price = urlParams.get("price");
+            const quantity = urlParams.get("quantity");
+            if (productId) {
+                // If single product is being purchased
+                fetch(`/get_single_product/?product_id=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            totalAmount = parseFloat(price) * parseInt(quantity);
+                            totalAmountElement.innerText = `₹${totalAmount.toFixed(2)}`;
+                            cartItemsContainer.innerHTML = `
+                                <div class="order-item">
+                                    <img src="${data.product.image_url}" alt="${data.product.product_name}" class="order-item-image">
+                                    <div class="order-item-details">
+                                        <p><strong>${data.product.name}</strong></p>
+                                        <p>Quantity: ${quantity}</p>
+                                        <p>Price: ₹${price}</p>
+                                        <p>Product ID: ${data.product.id}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => console.error("Error fetching product:", error));
+            } else {
+                // If checking out with cart items
+                fetch("/get_cart_items/")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.total_amount !== undefined) {
+                            totalAmount = data.total_amount;
+                            totalAmountElement.innerText = `₹${totalAmount.toFixed(2)}`;
+                        }
+                        cartItemsContainer.innerHTML = data.cart_items
+                            .map(
+                                (item) => `
+                                <div class="order-item">
+                                    <img src="${item.image_url}" alt="${item.product_name}" class="order-item-image">
+                                    <div class="order-item-details">
+                                        <p><strong>${item.product_name}</strong></p>
+                                        <p>Quantity: ${item.quantity}</p>
+                                        <p>Price: ₹${item.price}</p>
+                                        <p>Product ID: ${item.product_id}</p>
+                                    </div>
+                                </div>
+                            `
+                            )
+                            .join("");
+                    })
+                    .catch(error => console.error("Error fetching cart items:", error));
+            }
+        }
                 // Set estimated delivery date (3 days from now)
                 let currentDate = new Date();
                 currentDate.setDate(currentDate.getDate() + 3);
                 deliveryDateElement.innerText = currentDate.toLocaleDateString();
-            
-                // Change Payment Method
-                changePaymentButton?.addEventListener("click", function () {
-                    paymentSection.classList.remove("hidden");
-                    confirmationSection.classList.add("hidden");
-                });
+        }); 
+        function processPayment(method, productId = null, quantity = 1) { 
+            if (method === "COD") {
+                alert("Order placed with Cash on Delivery.");
+                window.location.href = "/order_success/";
+            } else {
+                // ✅ Fetch product ID and quantity from URL if not provided
+                if (!productId) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    productId = urlParams.get("product_id") || null;
+                    quantity = urlParams.get("quantity") || 1;
+                }
         
-            
-                // Handle Place Order Click
-                placeOrderButton?.addEventListener("click", function () {
-                    if (!selectedAddress) {
-                        alert("Please select an address.");
-                        return;
-                    }
-
-                    if (!paymentConfirmationText || !paymentConfirmationText.innerText.trim()) {
-                        alert("Please select a payment method.");
-                        return;
-                    }
-
-                    if (totalAmount <= 0) {
-                        alert("Invalid order amount. Please check your cart.");
-                        return;
-                    }
-
-                    const paymentMethod = paymentConfirmationText.innerText.trim();
-                    
-                    // Disable button to prevent multiple clicks
-                    placeOrderButton.disabled = true;
-                    placeOrderButton.innerText = "Processing...";
-
-                    fetch("/place_order/", {
-                        method: "POST",
-                        headers: {
-                            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            address_id: selectedAddress.id,
-                            payment_method: paymentMethod,
-                            total_amount: totalAmount
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === "success") {
-                            alert("Order placed successfully!");
-                            window.location.href = "/order_success/";
-                        } else {
-                            alert("Error placing order: " + (data.message || "Unknown error"));
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error placing order:", error);
-                        alert("An error occurred while placing your order. Please try again.");
-                    })
-                    .finally(() => {
-                        // Re-enable button after response
-                        placeOrderButton.disabled = false;
-                        placeOrderButton.innerText = "Place Order";
-                    });
-                });
-            });
-
+                let totalAmount = {{ amount|default:0 }};  // Get total price from Django template
+        
+                if (totalAmount <= 0) {
+                    alert("Invalid payment amount. Please check your cart.");
+                    return;
+                }
+        
+                alert("Redirecting to Razorpay...");
+        
+                // ✅ Construct the correct URL
+                let url = `/razorpay_payment/?amount=${totalAmount}`;
+        
+                // ✅ Pass product ID and quantity if available
+                if (productId !== null) {
+                    url += `&product_id=${productId}&quantity=${quantity}`;
+                }
+        
+                console.log("Final Payment URL:", url);
+                window.location.href = url;
+            }
+        }
+          
 </script>
-
+          
 <style>
     header {
-        background-color: #F5F5F7;
+        background-color:  #F5F5F7; /* Initially transparent */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
         padding: 15px 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
         font-size: 1.75rem;
         font-weight: bold;
-        color: #111;
-        border-bottom: 3px solid #e47911;
+        color: #111; /* Default text color */
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         border-radius: 0 0 8px 8px;
+        transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+        z-index: 1000; /* Ensures it's always above other elements */
     }
-    
+
+    /* Left and Center alignment */
     header .left {
         position: absolute;
         left: 20px;
     }
-    
+
     header .center {
         margin: 0 auto;
     }
+
+    /* Change background and text color when scrolled */
+    header.scrolled {
+        background-color: black !important; /* Black background on scroll */
+        color: white !important; /* White text on scroll */
+    }
     .section-title {
         font-size: 1.25rem;
+        margin-top: 20px;
         font-weight: bold;
         color: #e47911;
         margin-bottom: 20px;
@@ -402,7 +393,7 @@
         margin-bottom: 20px;
     }
     .product-item {
-        display: flex;
+        display: flex-center;
         align-items: center;
         margin-bottom: 15px;
         border-bottom: 1px solid #ddd;
@@ -417,11 +408,6 @@
     .item-details {
         display: flex;
     }
-    .remove-btn {
-        color: red;
-        cursor: pointer;
-        margin-left: 10px;
-    }
     .hidden {
         display: none;
     }
@@ -435,108 +421,42 @@
         font-family: Arial, sans-serif;
         background-color: #f8f8f8;
     }
-
-    .form-section {
-        padding: 20px;
+    #form-section {
+        margin-top: 16vh;
     }
-
     .section-title {
         font-size: 1.4em;
         color: #333;
         margin-bottom: 10px;
     }
-
     /* Address Card Styling */
     .address-card {
         padding: 20px;
-        background-color: #fff;
+        background-color: #f9f9f9;
         border: 1px solid #ddd;
+        margin-top: 8vh;
         border-radius: 8px;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
-        gap: 15px;
     }
 
     .address-label {
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        gap: 5px;
     }
-
-    .address-details {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .address-line {
-        color: #555;
-        font-size: 0.9em;
-    }
-
     input[type="radio"] {
         transform: scale(1.2);
         margin-top: 4px;
     }
-
-    /* Button Styling */
-    .address-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .btn {
-        padding: 8px 12px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.9em;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-primary {
-        background-color: #3399cc;
-        color: #fff;
-    }
-
-    .btn-change {
-        background-color: #6c757d;
-        color: #fff;
-    }
-
-    .btn-add-new {
-        background-color: #28a745;
-        color: #fff;
-    }
-
-    .btn-primary:hover {
-        background-color: #287ba5;
-    }
-
-    .btn-change:hover {
-        background-color: #5a6268;
-    }
-
-    .btn-add-new:hover {
-        background-color: #218838;
-    }
-
-    .order-items-container {
-        display: flex;
-        flex-direction: column;
-        gap: 10px; /* Space between items */
-    }
-    
     .order-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 10px;
-        border-bottom: 1px solid #ddd; /* Optional: Adds a divider */
+        border-bottom: 1px solid black; /* Optional: Adds a divider */
     }
-    
     .order-item img {
         width: 70px; /* Set a fixed width */
         height: 70px; /* Set a fixed height */
@@ -544,7 +464,6 @@
         border-radius: 5px; /* Optional: Rounded corners */
         margin-right: 15px;
     }
-    
     .order-item-details {
         flex-grow: 1;
         display: flex;
@@ -552,32 +471,6 @@
         align-items: center;
         width: 100%;
     }
-
-    .item-details {
-        flex: 2;
-        margin-left: 20px;
-    }
-    
-    .order-item-info {
-        flex: 1;
-        text-align: left;
-        font-size: 16px;
-        color: #333;
-    }
-    
-    .order-item-info strong {
-        text-align: center;
-        font-size: 16px;
-        text-align: right;
-        margin-right: ;
-        color: #333;
-    }
-
-    .order-item-quantity {
-        min-width: 120px;
-        text-align: center;  /* This ensures price stays at the same place */
-    }
-    
     .order-summary {
         margin-top: 20px;
         padding: 15px;
@@ -585,29 +478,10 @@
         border-radius: 5px;
         background-color: #f9f9f9;
     }
-    
     .order-summary h5 {
         margin-bottom: 10px;
         font-size: 18px;
     }
-    
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-        .address-card {
-            padding: 15px;
-        }
-
-        .address-actions {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-            margin-top: 5px;
-        }
-    }
-
 </style>
 
 </body>

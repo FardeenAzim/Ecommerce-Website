@@ -1,21 +1,40 @@
 from django.urls import path
-from . import views  # Import views from the current app
+from ecommerceapp import views
 
 urlpatterns = [
-    # Home and static pages
-    path('', views.index, name='index'),
-    path('about/', views.about, name='about'),
-    path('contact/', views.contact, name='contact'),
-    path('profiles/', views.profiles, name='profiles'),
-
-    # Cart and Checkout
-    path('cart/', views.cart_view, name='cart_view'),
+    path("", views.index, name="index"),
+    path('product/<int:id>/', views.product_detail, name='product_detail'),
+    # path("product/<int:product_id>/", views.product_detail, name="product_detail"),
+    path("get_cart_items/", views.get_cart_items, name="get_cart_items"),
+    # path("add-to-cart/", views.add_to_cart, name="add_to_cart"),
     path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
-    path('checkout/', views.checkout, name='checkout'),
-
-    # Address Management
-
-    # Razorpay Payment
-    path('razorpay-payment/', views.razorpay_payment, name='razorpay_payment'),
-    path('payment-success/', views.payment_success, name='payment_success'),
+    path('clear-cart/', views.clear_cart, name='clear_cart'),
+    path('save-cart-session/', views.save_cart_session, name='save_cart_session'),
+    path("remove-from-cart/", views.remove_from_cart, name="remove_from_cart"),
+    path("increase-quantity/", views.increase_quantity, name="increase_quantity"),
+    path("decrease-quantity/", views.decrease_quantity, name="decrease_quantity"),
+    path("checkout/", views.checkout, name="checkout"),
+    path("about", views.about, name="about"),
+    # path("submit_order/", views.submit_order, name="submit_order"),
+    path("get_saved_addresses/", views.get_saved_addresses, name="get_saved_addresses"),
+    path("save_address/", views.save_address, name="save_address"),
+    path("cart", views.cart, name="cart"),
+    path("contact", views.contact, name="contact"),
+    path('get_single_product/', views.get_single_product, name='get_single_product'),
+    path("get_cart_items/", views.get_cart_items, name="get_cart_items"),
+    # path('place_order/', views.place_order, name='place_order'),
+    path('checkout/<int:product_id>/<int:price>/<int:quantity>/', views.checkout, name='checkout'),
+    path("razorpay_payment/", views.razorpay_payment, name="razorpay_payment"),
+    path("payment_success/", views.payment_success, name="payment_success"),
+    # path("save_order/", views.save_order, name="save_order"),
+    path('order_success/', views.order_success, name='order_success'),
+    path("order_success/<int:order_id>/", views.order_success, name="order_success"),  # New for order_id
+    path('get_address/', views.get_address, name='get_address'),
+    path("orders/", views.orders, name="orders"),
+    path("get_orders/", views.get_orders, name="get_orders"),
+    path("order_details/<int:order_id>/", views.order_details, name="order_details"),
+    path("get_orders/", views.order_list, name="order_list"),  # This matches the fetch() request in your HTML
+    path("order_details/<int:order_id>/", views.order_details, name="order_details"),
+    # path("user_profile", views.user_profile, name="user_profile"),
+    path("profile", views.profile, name="profile"),
 ]

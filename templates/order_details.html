@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <style>
+        header {
+            background-color:  #F5F5F7; /* Initially transparent */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 98%;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            height: 10vh;
+            font-weight: bold;
+            color: #111; /* Default text color */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 8px 8px;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            z-index: 1000; /* Ensures it's always above other elements */
+        }
+    
+        /* Left and Center alignment */
+        header .left {
+            position: absolute;
+            left: 20px;
+        }
+    
+        header .center {
+            margin: 0 auto;
+        }
+    
+        /* Change background and text color when scrolled */
+        header.scrolled {
+            background-color: black !important; /* Black background on scroll */
+            color: white !important; /* White text on scroll */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 15vh;
+            margin-left: 50vh;
+        }
+        .order-header {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .order-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        .order-item-details {
+            font-size: 16px;
+        }
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .back-button {
+            background: #0073e6;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo d-flex align-items-center">
+            {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
+           <h1 class="logo" href="/">Shopille</h1>
+         </a>
+         <span class="center">Order Details</span>
+        <div class="header-right">
+            <span>Hello, {{ user.username }}</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <p class="order-header">Order #{{ order.id }} - {{ order.order_date }}</p>
+        <p>Status: <strong>{{ order.status }}</strong></p>
+
+        {% for item in ordered_items %}
+            <div class="order-item">
+                <img src="{{ item.image_url }}" alt="{{ item.product_name }}">
+                <div class="order-item-details">
+                    <p><strong>{{ item.product_name }}</strong></p>
+                    <p>Quantity: {{ item.quantity }}</p>
+                    <p>Price: ₹{{ item.price }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p>No items found in this order.</p>
+        {% endfor %}
+
+        <p class="total-amount">Total Amount: ₹{{ total_amount }}</p>
+
+        <a href="/orders/" class="back-button">Back to Orders</a>
+    </div>
+
+</body>
+</html>

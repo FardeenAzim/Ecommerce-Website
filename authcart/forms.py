@@ -47,6 +47,14 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'password1', 'password2']
+    
+from django import forms
+from ecommerceapp.models import CustomUser
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ["phone", "date_of_birth", "profile_picture"]
 
 
 

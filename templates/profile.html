@@ -1,0 +1,182 @@
+{% block content %}
+<header>
+    <a href="/" class="logo d-flex align-items-center">
+        <h1 class="logo">Shopille</h1>
+    </a>
+    <span class="center">My Profile</span>
+    <div class="header-right">
+        <span>Hello, {{ user.username }}</span>
+    </div>
+</header>
+
+ <!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container">
+    <h2 class="text-center mt-3">My Profile</h2>
+
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Joined On:</strong> {{ user.date_joined }}</p>
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#OrderModal">Order History</button>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#PaymentModal">Payment History</button>
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#CartModal">Cart Items</button>
+    </div>
+
+    <!-- Order History Modal -->
+    <div class="modal fade" id="OrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order History</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% if orders %}
+                        {% for order in orders|dictsortreversed:"id" %}
+                            <div class="border p-2 rounded mb-2">
+                                <p><strong>Order ID:</strong> {{ order.id }}</p>
+                                <p><strong>Total:</strong> ₹{{ order.amount }}</p>
+                                <p><strong>Status:</strong> {{ order.status }}</p>
+                                <div class="order-items">
+                                    {% for item in order.items.all %}
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" class="product-img">
+                                            <div>
+                                                <p><strong>{{ item.product.product_name }}</strong></p>
+                                                <p>Quantity: {{ item.quantity }}</p>
+                                                <p>Price: ₹{{ item.product.price }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No orders found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History Modal -->
+    <div class="modal fade" id="PaymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Payment History</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% if payments %}
+                        {% for payment in payments|dictsortreversed:"id" %}
+                            <div class="border p-2 rounded mb-2">
+                                <p><strong>Payment ID:</strong> {{ payment.id }}</p>
+                                <p><strong>Amount:</strong> ₹{{ payment.amount }}</p>
+                                <p><strong>Status:</strong> {{ payment.status }}</p>
+                                {% if payment.order.items.all %}
+                                    <div class="order-items">
+                                        {% for item in payment.order.items.all %}
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" class="product-img">
+                                                <div>
+                                                    <p><strong>{{ item.product.product_name }}</strong></p>
+                                                    <p>Quantity: {{ item.quantity }}</p>
+                                                    <p>Price: ₹{{ item.product.price }}</p>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No payment records found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Items Modal -->
+    <div class="modal fade" id="CartModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cart Items</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% if cart_items %}
+                        {% for item in cart_items|dictsortreversed:"id" %}
+                            <div class="d-flex align-items-center gap-2 border p-2 rounded mb-2">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" class="product-img">
+                                <div>
+                                    <p><strong>{{ item.product.product_name }}</strong></p>
+                                    <p>Quantity: {{ item.quantity }}</p>
+                                    <p>Price: ₹{{ item.product.price }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Your cart is empty.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        header {
+            background-color: #F5F5F7;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #111;
+            border-bottom: 3px solid #e47911;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 8px 8px;
+        }
+        header .center {
+            margin: 0 auto;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            margin-top: 8vh;
+            margin-left: 40vh;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .order-items, .cart-items {
+            margin-top: 10px;
+        }
+        .modal-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</div>
+
+{% endblock %}

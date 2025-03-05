@@ -57,7 +57,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'ecommerce.urls'
 
 
-# AUTH_USER_MODEL = 'ecommerceapp.CustomUser'
+AUTH_USER_MODEL = 'ecommerceapp.CustomUser'
 
 
 # Ensure the default charset is set to UTF-8

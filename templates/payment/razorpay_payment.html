@@ -6,21 +6,59 @@
     <title>Razorpay Payment</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
+        header {
+            background-color:  #F5F5F7; /* Initially transparent */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            height: 10vh;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #111; /* Default text color */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 8px 8px;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+            z-index: 1000; /* Ensures it's always above other elements */
+        }
+    
+        /* Left and Center alignment */
+        header .left {
+            position: absolute;
+            left: 20px;
+        }
+    
+        header .center {
+            margin: 0 auto;
+        }
+    
+        /* Change background and text color when scrolled */
+        header.scrolled {
+            background-color: black !important; /* Black background on scroll */
+            color: white !important; /* White text on scroll */
+        }
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f4;
-            display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 80vh;
             margin: 0;
         }
         .container {
             background: #fff;
             padding: 20px;
             border-radius: 12px;
+            margin-top: 30vh;
+            margin-left: 35vw;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
+            justify-content: center;
+            align-items: center;
             max-width: 400px;
             width: 100%;
         }
@@ -51,6 +89,13 @@
     </style>
 </head>
 <body>
+    <header>
+        <a href="/" class="logo d-flex align-items-center">
+            {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
+           <h1 class="logo" href="/">Shopille</h1>
+         </a>
+        <span class="center">Razorpay Payment Page</span>
+    </header>
     <div class="container">
         <h2>Complete Your Payment</h2>
 
@@ -65,26 +110,37 @@
             <script>
                 var options = {
                     "key": "{{ razorpay_key }}", 
-                    "amount": "{{ amount|floatformat:2 }}",  
+                    "amount": "{{ amount }}" * 100,  // Convert to paise
                     "currency": "{{ currency }}",
                     "name": "Shopille",
                     "description": "Purchase Payment",
                     "order_id": "{{ razorpay_order_id }}",
                     "handler": function (response) {
-                        alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
-                        window.location.href = `/payment_success/?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}`;
-                    },
+                        let successUrl = `/payment_success/?payment_id=${response.razorpay_payment_id}&order_id={{ razorpay_order_id }}&signature=${response.razorpay_signature}`;
+                
+                        {% if single_product %}
+                            successUrl += `&product_id={{ product_id }}&quantity={{ quantity }}`;
+                        {% endif %}
+                
+                        window.location.href = successUrl;
+                    },  // ✅ **Comma added here** (This was missing)
+                
                     "theme": {
                         "color": "#3399cc"
                     }
                 };
+                
                 var rzp1 = new Razorpay(options);
                 document.getElementById('pay-button').onclick = function(e){
                     rzp1.open();
                     e.preventDefault();
-                }
+                };
+                
             </script>
         {% endif %}
     </div>
 </body>
 </html>
+
+
+

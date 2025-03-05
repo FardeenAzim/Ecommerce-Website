@@ -1,0 +1,32 @@
+{% comment %} {% extends 'base.html' %} {% endcomment %}
+{% block content %}
+<div class="container mx-auto p-6">
+    <h2 class="text-2xl font-semibold mb-4">Your Saved Addresses</h2>
+    
+    {% if addresses %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for address in addresses %}
+            <div class="p-4 border rounded-lg shadow-md">
+                <p><strong>Name:</strong> {{ address.full_name }}</p>
+                <p><strong>Phone:</strong> {{ address.phone }}</p>
+                <p><strong>Street:</strong> {{ address.street }}</p>
+                <p><strong>City:</strong> {{ address.city }}</p>
+                <p><strong>State:</strong> {{ address.state }}</p>
+                <p><strong>Zip Code:</strong> {{ address.zip_code }}</p>
+                <p><strong>Country:</strong> {{ address.country }}</p>
+                <div class="mt-3">
+                    <a href="{% url 'edit_address' address.id %}" class="text-blue-500">Edit</a> |
+                    <a href="{% url 'delete_address' address.id %}" class="text-red-500">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500">You have no saved addresses.</p>
+    {% endif %}
+    
+    <div class="mt-6">
+        <a href="{% url 'add_address' %}" class="bg-blue-500 text-white px-4 py-2 rounded">Add New Address</a>
+    </div>
+</div>
+{% endblock %}

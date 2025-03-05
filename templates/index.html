@@ -47,25 +47,28 @@ Home
         <p><span>Check Our</span> <span class="description-title">Products</span></p>
     </div>
 
-    {% for product, range, nSlides in allProds %}
-    <h3 class="my-3 text-center text-success bg-light">{{ product.0.category }}</h3>
+    {% for prod_dict in allProds %}
+    <h3 class="my-3 text-center text-success bg-light">{{ prod_dict.category }}</h3>
     <div class="container">
         <div class="row">
-            {% for i in product %}
+            {% for product in prod_dict.products %}
             <div class="col-md-3 mt-3">
-                <div class="card" onclick="window.location.href='{% url 'product_detail' i.id %}'">
-                    <img src="{{ i.image.url }}" class="card-img-top img-size" alt="{{ i.product_name }}">
+                <div class="card" onclick="window.location.href='{% url 'product_detail' product.id %}'">
+                    <img src="{{ product.image.url }}" class="card-img-top img-size" alt="{{ product.product_name }}">
                     <div class="card-body">
-                        <h5 class="card-title mt-2">{{ i.product_name }}</h5>
-                        <p class="card-text">{{ i.desc|slice:"0:53" }}...</p>
-                        <h6 class="card-title mb-2">Price: ₹{{ i.price }}</h6>
+                        <h5 class="card-title mt-2">{{ product.product_name }}</h5>
+                        <p class="card-text">{{ product.desc|slice:"0:53" }}...</p>
+                        <h6 class="card-title mb-2">Price: ₹{{ product.price }}</h6>
+                        <p><strong>Product ID:</strong> {{ product.id }}</p>  <!-- Display Product ID -->
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-    </div> 
-    {% endfor %}
+    </div>
+{% endfor %}
+
+
 </section>
 
 <!-- Bootstrap CSS -->

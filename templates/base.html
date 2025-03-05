@@ -91,7 +91,7 @@
          spaces child element with even distribution between left and right{% endcomment %}
         <a href="/" class="logo d-flex align-items-center">
            {% comment %} <img src="static/assets/img/logo/mainlogo.jpg" alt="Shopille">  {% endcomment %}
-          <h1 class="logo" href="/">Shopille</h1>
+          <h1 class="logo" href="/" style="color: blue;">Shopille</h1>
         </a>
         {% comment %} Logo {% endcomment %}
 
@@ -114,30 +114,27 @@
             </a>
             {% comment %} About {% endcomment %}
 
-            <a href="/user_profile">
-              <button id="profiles" class="btn btn-light position-relative nav-link scrollto bg-secondary p-2 m-2 text-white" type="button" data-bs-toggle="popover"
-                title="My Profiles" style="border-radius: 15px;">
-                My Profiles
+            <a href="/profile">
+              <button id="profile" class="btn btn-light position-relative nav-link scrollto bg-secondary p-2 m-2 text-white" type="button" data-bs-toggle="popover"
+                title="profile" style="border-radius: 15px;">
+                My Profile
               </button>
             </a>
-
-            {% for user in users %}
-                <a href="{% url 'user_profile' user.username %}">{{ user.username }}</a><br>
-            {% endfor %}
-            {% comment %} My Profiles {% endcomment %}
         
             <!-- Cart Button with Popover -->
             <a href="/cart">
-              <button id="cart" class="btn btn-light position-relative nav-link scrollto bg-danger p-2 m-2 text-white" type="button" data-bs-toggle="popover"
-                title="Cart" data-bs-content="Items in your cart" style="border-radius: 15px;">
-                Cart 
-                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" id="cart-count">0</span>
-              </button>
+                <button id="cart" class="btn btn-light position-relative nav-link scrollto bg-danger p-2 m-2 text-white" 
+                    type="button" data-bs-toggle="popover" title="Cart" data-bs-content="Items in your cart" 
+                    style="border-radius: 15px;">
+                    Cart 
+                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" id="cart-count">0</span>
+                </button>
             </a>
+          
             {% comment %} Cart {% endcomment %}
 
               <li>
-              <a class="bg-secondary text-white p-2 m-2" href="/checkout" style="border-radius: 15px;">
+              <a class="bg-secondary text-white p-2 m-2" href="/checkout/" style="border-radius: 15px;">
                 <img
                 src="{% static '/assets/img/logo/orders.png'%}" 
                 alt="checkout" class="mx-1 white-icon"
@@ -147,7 +144,7 @@
             {% comment %} Checkout {% endcomment %}
             
             {% if request.user.is_authenticated %}
-            <span>Hello, {{ user.username }}</span>
+            {% comment %} <span>Hello, {{ user.username }}</span> {% endcomment %}
             <li>
               <a class="nav-link scrollto bg-primary p-2 m-2" href="/auth/logout/" style="border-radius: 15px;">
                 <img src="{% static '/assets/img/logo/loginlogo.png' %}" 
@@ -174,10 +171,31 @@
       </div>
     </header>
 
+    <script>
+      function updateCartCount() {
+          fetch("/get_cart_items/")
+              .then(response => response.json())
+              .then(data => {
+                  if (data.cart_items) {
+                      let totalCount = data.cart_items.reduce((total, item) => total + item.quantity, 0);
+                      document.querySelectorAll("#cart-count").forEach(element => {
+                          element.textContent = totalCount;
+                      });
+                  }
+              })
+              .catch(error => console.error("Error fetching cart count:", error));
+      }
+  
+      document.addEventListener("DOMContentLoaded", () => {
+          updateCartCount();
+      });
+  </script>
+  
+
     <main class="main">
       <!-- Hero Section -->
-       <section id="hero" class="hero section dark-background">
-        <img src="{% static '/assets/images/bgg.jpg'%}" alt="" data-aos="fade-in" />
+       <section id="hero">
+        {% comment %} <img src="{% static '/assets/images/bgg.jpg'%}" alt="" data-aos="fade-in" /> {% endcomment %}
         {% comment %} Background Image {% endcomment %}
 
         <div
@@ -215,7 +233,7 @@
       <div class="container footer-top">
         <div class="row gy-4">
           <div class="col-lg-5 col-md-12 footer-about">
-            <a href="index.html" class="logo d-flex align-items-center">
+            <a href="/" class="logo d-flex align-items-center">
               <span class="sitename">Shopille</span>
             </a>
             <p>
