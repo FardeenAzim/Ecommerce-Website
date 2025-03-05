@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Page</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <span class="left">Shopille</span>
+        <span class="center">Checkout</span>
+    </header>
+    <div class="container my-4">
+        <!-- Step 1: Select a delivery address -->
+        <div id="form-section" class="mb-4">
+            <h4 class="section-title">1. Enter a new shipping address</h4>
+            <div class="card"> 
+                <form id="checkout-form" method="post" action="checkout">
+                    {% csrf_token %}
+                    <input type="hidden" id="amount" name="amount" value="{{ amount }}"> <!-- Hidden input for amount -->
+                    <div class="col-md-12">
+                        <label for="name" class="form-label">Enter Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter Phone Number" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="address1" class="form-label">Address 1</label>
+                        <input type="text" class="form-control" id="address1" name="address1" placeholder="Enter your Address" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="address2" class="form-label">Address 2</label>
+                        <input type="text" class="form-control" id="address2" name="address2" placeholder="Confirm Your Address">
+                    </div>
+                    <div class="col-md-12">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" id="city" name="city" placeholder="Enter Your City" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="state" class="form-label">State</label>
+                        <input type="text" class="form-control" id="state" name="state" placeholder="Enter your State" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="zip_code" class="form-label">Zip Code</label>
+                        <input type="text" class="form-control" id="zip_code" name="zip_code" placeholder="Enter pincode" required>
+                    </div>
+                    <div class="col-12 my-4">
+                        <button type="submit" id="saveAddressButton" class="btn btn-warning mt-3">Save this address</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+         <!-- Saved addresses display section -->
+         <div id="savedAddressesSection" class="form-section mt-4 hidden">
+            <h4 class="section-title">SELECT A DELIVERY ADDRESS</h4>
+            <div id="savedAddresses" class="address-card">
+                <div class="address-actions">
+                    <button id="changeAddressButton" class="btn btn-change">Change</button>
+                    <button id="addNewAddressButton" class="btn btn-add-new">Add a new address</button>
+                </div>
+            </div>
+        </div> 
+        <div class="container my-4"> 
+            <!-- Items and delivery section -->
+            <div id="orderSummarySection" class="mb-4 hidden">
+                <h4 class="section-title">ORDER SUMMARY</h4>
+                <div class="card">
+                    <div id="cartItemsContainer" class="order-summary mt-3">
+                    {% for item in cart_items %}
+                        <li>
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}" width="50">
+                            <strong>{{ item.product.product_name }}</strong>
+                            <p>Quantity: {{ item.quantity }}</p>
+                            <p>Price: ₹{{ item.product.price }}</p>
+                        </li>
+                    {% endfor %}
+                    </div>
+                    <div class="order-summary mt-3">
+                        <h5>Order Summary</h5>
+                        <div class="d-flex justify-content-between">
+                            <h5>Total Product Price: ₹<span id="total-amount">0</span></h5>
+                        </div>
+                        <hr>
+                        <label for="selectedDeliveryDate" style="display: inline-flex; align-items: center; gap: 10px;">
+                            
+                            <p style="margin: 0;">Expected delivery date: <input type="radio" name="deliveryDate" id="selectedDeliveryDate" checked style="margin: 0;"> <span id="deliveryDate"></span></p>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <!-- Payment section -->
+        <div id="paymentSection" class="mb-4 hidden">
+            <h4 class="section-title">PAYMENT METHOD</h4>
+            {% comment %} <button class="btn btn-secondary mb-2" id="applyCouponButton">Apply Coupon</button> {% endcomment %}
+            <button class="btn btn-primary mb-2" id="payWithRazorpay" value="Razorpay">Pay with Razorpay</button>
+            <button class="btn btn-primary mb-2" id="codOption" value="COD">Cash on Delivery</button>
+            
+        </div>
+        <!-- Confirmation Section (Visible after Payment Option Selected) -->
+        <div id="confirmationSection" class="mb-4 hidden">
+            <h4 class="section-title">SELECTED PAYMENT OPTION</h4>
+            <div class="card">
+                <label for="selectedPayment" style="display: inline-flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="paymentOption" id="selectedPayment" checked> <span id="paymentConfirmationText"></span>
+                </label>
+            </div>
+            <button id="changePaymentButton" class="btn btn-warning mt-2">Change Payment Option</button>
+            <button id="placeOrderButton" type="submit" class="btn btn-warning mt-3">Place Order</button>
+        </div>
+
+<script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const checkoutForm = document.getElementById('checkout-form');
+                const savedAddressesSection = document.getElementById('savedAddressesSection');
+                const savedAddresses = document.getElementById('savedAddresses');
+                const formSection = document.getElementById('form-section');
+                const paymentSection = document.getElementById('paymentSection');
+                const confirmationSection = document.getElementById('confirmationSection');
+                const orderSummarySection = document.getElementById('orderSummarySection');
+                const cashOnDeliveryButton = document.getElementById('codOption');
+                const razorpayButton = document.getElementById('payWithRazorpay');
+                const placeOrderButton = document.getElementById('placeOrderButton');
+                const paymentConfirmationText = document.getElementById('paymentConfirmationText');
+                const changePaymentButton = document.getElementById('changePaymentButton');
+                const cartItemsContainer = document.getElementById("cartItemsContainer");
+                const totalAmountElement = document.getElementById("total-amount");
+                const deliveryDateElement = document.getElementById("deliveryDate");
+                let selectedAddress = null;
+                let totalAmount = 0
+            
+                // Fetch saved addresses
+                fetch('/get_saved_addresses/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success' && data.addresses.length > 0) {
+                            displaySavedAddresses(data.addresses);
+                        } else {
+                            showAddressForm();
+                        }
+                    });
+            
+                // Function to display saved addresses
+                function displaySavedAddresses(addresses) {
+                    formSection.classList.add("hidden");
+                    savedAddressesSection.classList.remove("hidden");
+
+                    savedAddresses.innerHTML = addresses
+                        .map(
+                            (address) => `
+                            <label class="address-label">
+                                <input type="radio" name="address" value="${address.id}" data-details='${JSON.stringify(address)}'>
+                                <div class="address-details">
+                                    <p><strong>${address.name}</strong></p>
+                                    <p>${address.phone}</p>
+                                    <p>${address.address1}, ${address.address2}</p>
+                                    <p>${address.city}, ${address.state} - ${address.zip_code}</p>
+                                </div>
+                            </label>`
+                        )
+                        .join("") +
+                        `<button id="changeAddressButton" class="btn">Change</button>
+                        <button id="addNewAddressButton" class="btn">Add New Address</button>
+                        <button id="useAddressButton" class="btn btn-primary">Use This Address</button>`;
+
+                    document.querySelectorAll('input[name="address"]').forEach((radio) => {
+                        radio.addEventListener("change", () => {
+                            selectedAddress = JSON.parse(radio.dataset.details);
+                            orderSummarySection.classList.remove("hidden");
+                            displayOrderSummary();
+                        });
+                    });
+
+        // Add event listeners for Change and Add New Address buttons
+        document.getElementById("changeAddressButton").addEventListener("click", () => {
+            if (selectedAddress) {
+                populateForm(selectedAddress);
+                showAddressForm();
+            } else {
+                alert("Please select an address to change.");
+            }
+        });
+
+        document.getElementById("addNewAddressButton").addEventListener("click", () => {
+            checkoutForm.reset();
+            showAddressForm();
+        });
+
+        document.getElementById("useAddressButton").addEventListener("click", () => {
+            if (selectedAddress) {
+                orderSummarySection.classList.remove("hidden");
+                displayOrderSummary();
+            } else {
+                alert("Please select an address.");
+            }
+        });
+    }
+
+    // Function to populate the address form for editing
+    function populateForm(address) {
+        checkoutForm.elements["name"].value = address.name;
+        checkoutForm.elements["phone"].value = address.phone;
+        checkoutForm.elements["address1"].value = address.address1;
+        checkoutForm.elements["address2"].value = address.address2;
+        checkoutForm.elements["city"].value = address.city;
+        checkoutForm.elements["state"].value = address.state;
+        checkoutForm.elements["zip_code"].value = address.zip_code;
+    }
+
+    // Function to show the address form
+    function showAddressForm() {
+        savedAddressesSection.classList.add("hidden");
+        formSection.classList.remove("hidden");
+    }
+
+    // Handle address form submission
+    checkoutForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(checkoutForm);
+        fetch("/save_address/", {
+            method: "POST",
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    alert("Address saved successfully!");
+                    displaySavedAddresses(data.addresses);
+                } else {
+                    alert("Error saving address: " + data.message);
+                }
+            })
+            .catch((error) => console.error("Error saving address:", error));
+    });
+
+    // Fetch & display order summary
+    function displayOrderSummary() {
+        fetch("/get_cart_items/")
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.total_amount !== undefined) {
+                    totalAmount = data.total_amount;
+                    totalAmountElement.innerText = `${totalAmount.toFixed(2)}`;
+                }
+
+                if (cartItemsContainer) {
+                    cartItemsContainer.innerHTML = data.cart_items
+                        .map(
+                            (item) => `
+                        <div class="order-item">
+                            <img src="${item.image_url}" alt="${item.product_name}" class="order-item-image">
+                            <div class="order-item-details">
+                                <p><strong>${item.product_name}</strong></p>
+                                <p>Quantity: ${item.quantity}</p>
+                                <p>Price: ₹${item.price}</p>
+                            </div>
+                        </div>
+                    `
+                        )
+                        .join("");
+                }
+
+                paymentSection.classList.remove("hidden");
+            })
+            .catch((error) => console.error("Error fetching cart items:", error));
+    }
+
+            
+                // Handle Razorpay Payment Selection
+                razorpayButton?.addEventListener("click", function () {
+                    if (totalAmount <= 0) {
+                        alert("Invalid payment amount. Please check your cart.");
+                        return;
+                    }
+                    localStorage.setItem("paymentMethod", "Razorpay");
+                    window.location.href = `/razorpay_payment/?amount=${totalAmount}`;
+                });
+            
+                // Handle COD Selection
+                cashOnDeliveryButton?.addEventListener("click", function () {
+                    localStorage.setItem("paymentMethod", "Cash on Delivery");
+                    showConfirmationSection("Cash on Delivery");
+                });
+            
+                // Show Confirmation Section
+                function showConfirmationSection(paymentMethod) {
+                    if (!paymentConfirmationText) return;
+                    paymentConfirmationText.innerText = `${paymentMethod}`;
+                    confirmationSection.classList.remove("hidden");
+                    paymentSection.classList.add("hidden");
+                    orderSummarySection.classList.remove("hidden");
+                }
+            
+                // Set estimated delivery date (3 days from now)
+                let currentDate = new Date();
+                currentDate.setDate(currentDate.getDate() + 3);
+                deliveryDateElement.innerText = currentDate.toLocaleDateString();
+            
+                // Change Payment Method
+                changePaymentButton?.addEventListener("click", function () {
+                    paymentSection.classList.remove("hidden");
+                    confirmationSection.classList.add("hidden");
+                });
+        
+            
+                // Handle Place Order Click
+                placeOrderButton?.addEventListener("click", function () {
+                    if (!selectedAddress) {
+                        alert("Please select an address.");
+                        return;
+                    }
+
+                    if (!paymentConfirmationText || !paymentConfirmationText.innerText.trim()) {
+                        alert("Please select a payment method.");
+                        return;
+                    }
+
+                    if (totalAmount <= 0) {
+                        alert("Invalid order amount. Please check your cart.");
+                        return;
+                    }
+
+                    const paymentMethod = paymentConfirmationText.innerText.trim();
+                    
+                    // Disable button to prevent multiple clicks
+                    placeOrderButton.disabled = true;
+                    placeOrderButton.innerText = "Processing...";
+
+                    fetch("/place_order/", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            address_id: selectedAddress.id,
+                            payment_method: paymentMethod,
+                            total_amount: totalAmount
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            alert("Order placed successfully!");
+                            window.location.href = "/order_success/";
+                        } else {
+                            alert("Error placing order: " + (data.message || "Unknown error"));
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error placing order:", error);
+                        alert("An error occurred while placing your order. Please try again.");
+                    })
+                    .finally(() => {
+                        // Re-enable button after response
+                        placeOrderButton.disabled = false;
+                        placeOrderButton.innerText = "Place Order";
+                    });
+                });
+            });
+
+</script>
+
+<style>
+    header {
+        background-color: #F5F5F7;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #111;
+        border-bottom: 3px solid #e47911;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 8px 8px;
+    }
+    
+    header .left {
+        position: absolute;
+        left: 20px;
+    }
+    
+    header .center {
+        margin: 0 auto;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #e47911;
+        margin-bottom: 20px;
+    }
+    .card {
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .product-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+    }
+    .product-item img {
+        width: 580px;
+        height: 280px;
+        object-fit: cover;
+        margin-right: 15px;
+    }
+    .item-details {
+        display: flex;
+    }
+    .remove-btn {
+        color: red;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    .hidden {
+        display: none;
+    }
+    /* Style the checked radio button with blue */
+    input[type="radio"]:checked + label {
+        color: blue;
+        font-weight: bold;
+    }
+    /* General Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f8f8;
+    }
+
+    .form-section {
+        padding: 20px;
+    }
+
+    .section-title {
+        font-size: 1.4em;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    /* Address Card Styling */
+    .address-card {
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .address-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .address-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .address-line {
+        color: #555;
+        font-size: 0.9em;
+    }
+
+    input[type="radio"] {
+        transform: scale(1.2);
+        margin-top: 4px;
+    }
+
+    /* Button Styling */
+    .address-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #3399cc;
+        color: #fff;
+    }
+
+    .btn-change {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+    .btn-add-new {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background-color: #287ba5;
+    }
+
+    .btn-change:hover {
+        background-color: #5a6268;
+    }
+
+    .btn-add-new:hover {
+        background-color: #218838;
+    }
+
+    .order-items-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Space between items */
+    }
+    
+    .order-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid #ddd; /* Optional: Adds a divider */
+    }
+    
+    .order-item img {
+        width: 70px; /* Set a fixed width */
+        height: 70px; /* Set a fixed height */
+        object-fit: cover; /* Ensures uniform image display */
+        border-radius: 5px; /* Optional: Rounded corners */
+        margin-right: 15px;
+    }
+    
+    .order-item-details {
+        flex-grow: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .item-details {
+        flex: 2;
+        margin-left: 20px;
+    }
+    
+    .order-item-info {
+        flex: 1;
+        text-align: left;
+        font-size: 16px;
+        color: #333;
+    }
+    
+    .order-item-info strong {
+        text-align: center;
+        font-size: 16px;
+        text-align: right;
+        margin-right: ;
+        color: #333;
+    }
+
+    .order-item-quantity {
+        min-width: 120px;
+        text-align: center;  /* This ensures price stays at the same place */
+    }
+    
+    .order-summary {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    
+    .order-summary h5 {
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+    
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .address-card {
+            padding: 15px;
+        }
+
+        .address-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            margin-top: 5px;
+        }
+    }
+
+</style>
+
+</body>
+</html>
+

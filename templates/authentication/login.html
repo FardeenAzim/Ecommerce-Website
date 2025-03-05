@@ -1,0 +1,48 @@
+{% extends './baseauth.html' %}
+
+{% block title %}Login{% endblock title %}
+
+{% block content %}
+
+<div class="container mt-2">
+  <div class="card bg-dark mt-5 mx-auto" style="max-width: 400px;">
+
+    <!-- Display alert messages -->
+    {% if messages %}
+        <div class="container mt-2">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <h3 class="text-white p-3 text-center">Login</h3>
+    <form action="{% url 'login' %}" method="post"> <!-- Using dynamic URL here -->
+      {% csrf_token %}
+      
+      <label for="email" class="text-white p-2">Email</label>
+      <div class="form-group p-2">
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email" required>
+      </div>
+
+      <label for="password" class="text-white p-2">Password</label>
+      <div class="form-group p-2">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required autocomplete="off">
+      </div>
+
+      <div class="text-center p-3">
+        <button type="submit" class="btn btn-primary text-white w-100">Login</button>
+      </div>
+
+      <div class="text-center p-2">
+        <i class="text-white">New User?</i>
+        <a href="{% url 'signup' %}" class="btn btn-link text-info">Signup</a> <!-- Using dynamic URL here -->
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock content %}

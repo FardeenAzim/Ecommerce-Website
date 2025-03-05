@@ -1,0 +1,34 @@
+<!-- address_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Address List</title>
+</head>
+<body>
+    <h1>Saved Addresses</h1>
+    
+    <!-- Display existing addresses -->
+    <ul>
+        {% for address in addresses %}
+            <li>
+                <p><strong>{{ address.full_name }}</strong></p>
+                <p>{{ address.address_line1 }}, {{ address.city }}, {{ address.state }}</p>
+                <p>{{ address.pincode }}</p>
+                <p>{{ address.mobile_number }}</p>
+                <p>Default: {{ address.is_default|yesno:"Yes,No" }}</p>
+            </li>
+        {% empty %}
+            <p>No addresses saved.</p>
+        {% endfor %}
+    </ul>
+    
+    <h2>Add New Address</h2>
+    <!-- New Address Form -->
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Address</button>
+    </form>
+</body>
+</html>

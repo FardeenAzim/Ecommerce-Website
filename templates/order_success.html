@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Successful</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        .success-message {
+            color: green;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .shipping-details {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        .shipping-details strong {
+            font-weight: bold;
+        }
+        .delivery-date {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .order-image {
+            display: block;
+            margin: 10px auto;
+            max-width: 100px;
+        }
+        .orders-link {
+            color: #0073e6;
+            text-decoration: none;
+            font-size: 16px;
+            display: block;
+            margin-top: 10px;
+        }
+        .continue-shopping {
+            background: #ffcc00;
+            color: black;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+            width: 200px;
+        }
+        .cart-items {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .cart-item img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        .cart-item-details {
+            font-size: 14px;
+        }
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <p class="success-message">✔ Order placed, thank you!</p>
+        {% comment %} <p>Confirmation will be sent to <a href="#" class="orders-link">Message Centre</a>.</p> {% endcomment %}
+
+        <!-- Address Section -->
+        <div class="shipping-details">
+            <h3>Shipping Address</h3>
+            <p><strong id="name"></strong></p>
+            <p id="address1"></p>
+            <p id="address2"></p>
+            <p id="city-state-zip"></p>
+        </div>
+
+        <!-- Expected Delivery Date -->
+        <p class="delivery-date">📅 Expected Delivery: <strong id="expected-delivery-date"></strong></p>
+
+        <!-- Cart Items Section -->
+        <div class="cart-items">
+            <h3>Your Ordered Items</h3>
+            <div id="cart-items-container"></div>
+            <p class="total-amount">Total Amount: ₹<span id="total-amount"></span></p>
+        </div>
+
+        <a href="/orders/" class="orders-link">Go to your orders ›</a>
+
+        <a href="/"><button class="continue-shopping">Continue Shopping</button></a>
+    </div>
+
+    <script>
+        window.onload = function () {
+            // Fetch Address from Backend
+            fetch("/get_address/", { credentials: "include" })  // Ensure user session is included
+                .then(response => response.json())
+                .then(data => {
+                    // Ensure the elements exist before modifying them
+                    const name = document.getElementById("name");
+                    const address1 = document.getElementById("address1");
+                    const address2 = document.getElementById("address2");
+                    const cityStateZip = document.getElementById("city-state-zip");
+        
+                    if (name && address1 && cityStateZip ) {
+                        if (data.error) {
+                            console.error("Address not found");
+                            recipient.innerText = "Address not found";
+                        } else {
+                            name.innerText = data.name || "N/A";
+                            address1.innerText = data.address1 || "N/A";
+                            address2.innerText = data.address2 || "";
+                            cityStateZip.innerText = `${data.city}, ${data.state} - ${data.zip_code}`;
+                        }
+                    } else {
+                        console.error("Some address elements are missing in the HTML.");
+                    }
+                })
+                .catch(error => console.error("Error fetching address:", error));
+        
+            // Fetch Cart Items from Backend
+            fetch("/get_cart_items/")
+                .then(response => response.json())
+                .then(data => {
+                    const cartItemsContainer = document.getElementById("cart-items-container");
+                    const totalAmountElement = document.getElementById("total-amount");
+        
+                    if (cartItemsContainer && totalAmountElement) {
+                        cartItemsContainer.innerHTML = data.cart_items.map(item => `
+                            <div class="cart-item">
+                                <img src="${item.image_url}" alt="${item.product_name}">
+                                <div class="cart-item-details">
+                                    <p><strong>${item.product_name}</strong></p>
+                                    <p>Quantity: ${item.quantity}</p>
+                                    <p>Price: ₹${item.price}</p>
+                                </div>
+                            </div>
+                        `).join('');
+        
+                        // Update total amount
+                        totalAmountElement.textContent = data.total_amount.toFixed(2);
+                    } else {
+                        console.error("Cart elements are missing in the HTML.");
+                    }
+                })
+                .catch(error => console.error("Error fetching cart items:", error));
+        
+            // Calculate Expected Delivery Date (3 days from now)
+            let currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + 3);
+            const expectedDeliveryElement = document.getElementById("expected-delivery-date");
+            if (expectedDeliveryElement) {
+                expectedDeliveryElement.innerText = currentDate.toLocaleDateString();
+            }
+        };
+        
+        
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Successful</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        .success-message {
+            color: green;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .shipping-details {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        .shipping-details strong {
+            font-weight: bold;
+        }
+        .delivery-date {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .order-image {
+            display: block;
+            margin: 10px auto;
+            max-width: 100px;
+        }
+        .orders-link {
+            color: #0073e6;
+            text-decoration: none;
+            font-size: 16px;
+            display: block;
+            margin-top: 10px;
+        }
+        .special-offer {
+            background: #eaf4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .offer-text {
+            font-size: 16px;
+        }
+        .continue-shopping {
+            background: #ffcc00;
+            color: black;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+            width: 200px;
+        }
+        .cart-items {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .cart-item img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        .cart-item-details {
+            font-size: 14px;
+        }
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <p class="success-message">✔ Order placed, thank you!</p>
+        <p>Confirmation will be sent to <a href="#" class="orders-link">Message Centre</a>.</p>
+
+        <!-- Saved Address Section -->
+        <div class="shipping-details">
+            <p><strong>Shipping to {{ recipient_name }}</strong></p>
+            <p>{{ address_line_1 }}, {{ address_line_2 }}</p>
+            <p>{{ city }}, {{ state }} - {{ zip_code }}, {{ country }}</p>
+        </div>
+
+        <p class="delivery-date">📅 Delivery Date: <strong>{{ delivery_date }}</strong></p>
+
+        <!-- Cart Items Section -->
+        <div class="cart-items">
+            <h3>Your Ordered Items</h3>
+            <div id="cart-items-container"></div>
+            <p class="total-amount">Total Amount: ₹<span id="total-amount">{{ total_amount }}</span></p>
+        </div>
+
+        <a href="/orders" class="orders-link">Go to your orders ›</a>
+
+        <button class="continue-shopping">Continue Shopping</button>
+    </div>
+
+    <script>
+        // Fetch cart items from backend
+        fetch("/get_cart_items/")
+            .then(response => response.json())
+            .then(data => {
+                const cartItemsContainer = document.getElementById("cart-items-container");
+                if (cartItemsContainer) {
+                    cartItemsContainer.innerHTML = data.cart_items.map(item => `
+                        <div class="cart-item">
+                            <img src="${item.image_url}" alt="${item.product_name}">
+                            <div class="cart-item-details">
+                                <p><strong>${item.product_name}</strong></p>
+                                <p>Quantity: ${item.quantity}</p>
+                                <p>Price: ₹${item.price}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    // Update total amount
+                    document.getElementById("total-amount").textContent = data.total_amount.toFixed(2);
+                }
+            })
+            .catch(error => console.error("Error fetching cart items:", error));
+
+            // Set estimated delivery date (3 days from now)
+            let currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + 3);
+            deliveryDateElement.innerText = currentDate.toLocaleDateString();
+    </script>
+
+</body>
+</html> {% endcomment %}

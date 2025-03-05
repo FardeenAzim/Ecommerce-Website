@@ -1,0 +1,9 @@
+<!-- authapp/templates/authapp/home.html -->
+{% extends 'baseauth.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block bodyforms %}
+<h2>Welcome, {{ user.username }}!</h2>
+<a href="{% url 'logout' %}">Logout</a>
+{% endblock %}

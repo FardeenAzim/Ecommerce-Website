@@ -1,0 +1,27 @@
+{% extends './baseauth.html' %}
+
+{% block title %}Logout{% endblock title %}
+
+{% block content %}
+
+<div class="container mt-5">
+  <div class="card bg-dark mt-5 mx-auto" style="max-width: 400px;">
+
+    <h3 class="text-white p-3 text-center">Logout</h3>
+    
+    <div class="alert alert-info">
+      You have successfully logged out.
+    </div>
+
+    <div class="text-center p-3">
+      <a href="{% url 'login' %}" class="btn btn-primary text-white w-100">Login Again</a>
+    </div>
+
+    <div class="text-center p-2">
+      <a href="/" class="btn btn-link text-info">Back to Home</a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Confirmation</title>
+</head>
+<body>
+    <h1>Order Confirmation</h1>
+    <h2>Order Details</h2>
+    <ul>
+        {% for item in order.items.all %}
+        <li>
+            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 50px; height: 50px;">
+            {{ item.product.name }} - {{ item.quantity }} x ₹{{ item.product.price }}
+        </li>
+        {% endfor %}
+    </ul>
+    <h3>Total Amount: ₹{{ order.total_amount }}</h3>
+    <p>Expected Delivery Date: {{ order.expected_delivery_date }}</p>
+    <a href="/checkout/">Back to Checkout</a>
+</body>
+</html>

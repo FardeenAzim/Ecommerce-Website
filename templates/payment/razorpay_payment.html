@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            color: #333;
+        }
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        #pay-button {
+            background-color: #3399cc;
+            color: white;
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+        }
+        #pay-button:hover {
+            background-color: #287bb5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Complete Your Payment</h2>
+
+        {% if error %}
+            <p class="error">Error: {{ error }}</p>
+        {% else %}
+            <p><strong>Order ID:</strong> {{ razorpay_order_id }}</p>
+            <p><strong>Amount:</strong> ₹{{ amount }}0</p>
+
+            <button id="pay-button">Pay with Razorpay</button>
+
+            <script>
+                var options = {
+                    "key": "{{ razorpay_key }}", 
+                    "amount": "{{ amount|floatformat:2 }}",  
+                    "currency": "{{ currency }}",
+                    "name": "Shopille",
+                    "description": "Purchase Payment",
+                    "order_id": "{{ razorpay_order_id }}",
+                    "handler": function (response) {
+                        alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
+                        window.location.href = `/payment_success/?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}`;
+                    },
+                    "theme": {
+                        "color": "#3399cc"
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                document.getElementById('pay-button').onclick = function(e){
+                    rzp1.open();
+                    e.preventDefault();
+                }
+            </script>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #3399cc;
+        }
+
+        .payment-details {
+            margin-top: 20px;
+        }
+
+        .payment-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .payment-details th,
+        .payment-details td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .payment-details th {
+            background-color: #f9f9f9;
+        }
+
+        .success {
+            color: green;
+            font-size: 1.2em;
+            text-align: center;
+        }
+    </style>
+    <script>
+       
+        // Redirect to checkout page after 5 seconds
+        setTimeout(function() {
+            window.location.href = "/order_success/";  // Adjust this path to match your checkout page URL
+        }, 5000);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentId = urlParams.get("payment_id");
+            const orderId = urlParams.get("order_id");
+        
+            if (paymentId && orderId) {
+                localStorage.setItem("paymentMethod", "Razorpay");
+        
+                // Show saved address section
+                savedAddressesSection.classList.remove("hidden");
+        
+                // Fetch & display order summary
+                displayOrderSummary();
+        
+                // Show confirmation section with Razorpay selected
+                showConfirmationSection("Razorpay");
+            }
+        });
+        
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payment Successful!</h1>
+            <p class="success">You will be redirected to the checkout page shortly...</p>
+        </div>
+
+        <h2>Order Details</h2>
+        <p><strong>Order ID:</strong> {{ order.razorpay_order_id }}</p>
+        <p><strong>Amount Paid:</strong> ₹{{ order.amount }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+
+        <h2>Payment Details</h2>
+        <p><strong>Payment ID:</strong> {{ payment.razorpay_payment_id }}</p>
+        <p><strong>Amount:</strong> ₹{{ payment.amount }}</p>
+        <p><strong>Status:</strong> {{ payment.status }}</p>
+
+    </div>
+</body>
+</html> 
+{% comment %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Payment Successful</title>
+</head>
+<body>
+    <h2>Payment Successful!</h2>
+
+    {% if error %}
+        <p style="color: red;">Error: {{ error }}</p>
+    {% else %}
+        <p>Order ID: {{ order.razorpay_order_id }}</p>
+        <p>Payment ID: {{ payment.razorpay_payment_id }}</p>
+        <p>Amount Paid: ₹{{ order.amount }}</p>
+        <p>Status: {{ order.status }}</p>
+    {% endif %}
+
+    <script>
+    // Redirect to checkout page after 5 seconds
+        setTimeout(function() {
+            window.location.href = "/checkout";  // Adjust this path to match your checkout page URL
+        }, 5000);
+    </script>
+</body>
+</html> {% endcomment %}
