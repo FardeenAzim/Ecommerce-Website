@@ -22,15 +22,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k87ut)sqpb-7iu*y=k-(*6-3)&zpp%+7%g%$1)4bu+1#&-e4v*'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     ".onrender.com",
+    "ecommerce-website.onrender.com",
 ]
 
 
@@ -160,8 +161,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # e.g., 'smtp.gmail.com'
 EMAIL_PORT = 587  # or 465 for SSL
 EMAIL_USE_TLS = True  # or EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'shpfy31@gmail.com'
-EMAIL_HOST_PASSWORD = 'daip tfxp xqpa macx'
+
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = 'shpfy31@gmail.com'
 
 # Ensure that you're using UTF-8 encoding
@@ -203,5 +205,6 @@ MESSAGE_TAGS = {
 
 
 # RAZORPAY API
-RAZORPAY_KEY_ID = 'rzp_test_imy5kIJrbR7Lc2'
-RAZORPAY_KEY_SECRET = 'cdGkoZNYq8CV3tXpFfDcSE3t'
+
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
