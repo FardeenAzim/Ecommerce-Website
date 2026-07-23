@@ -1,0 +1,15 @@
+git commit -m "Configure Cloudinary storage for production"# Python
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Database
+db.sqlite3
+
+# Media uploads
+media/
+
+# Static collected files
+staticfiles/
